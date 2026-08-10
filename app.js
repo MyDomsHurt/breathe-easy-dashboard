@@ -2,10 +2,10 @@
  * Static SPA: Competition | Full Team | Personal profiles
  * Data: data.json + weeks.json (merged at load)
  * Layout: app shell — nav in document flow, #app is the only scroll container.
- *   Never use position:fixed/sticky on nav. Never use a nav spacer.
+ * Brand: navy #154487, blue #1481c3, sky #59bcee, orange #fb8e28
  * Charts: Chart.js. One hero chart per page. No revenue in UI.
  */
-const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3aed',Tiago:'#0891b2'};
+const TECH_COLORS = {Matthew:'#1481c3',Nick:'#16a34a',Iggi:'#fb8e28',Alun:'#154487',Tiago:'#59bcee'};
 let DATA=null, charts=[], RANK_MODE='day', TEAM_SCALE='week';
 
 function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
@@ -303,7 +303,7 @@ function renderCompetition(){
   charts.push(new Chart(document.getElementById('c1'),{
     type:'bar',
     data:{labels:sorted.map(t=>t.name),datasets:[{data:sorted.map(t=>t[metricKey]),backgroundColor:sorted.map(t=>TECH_COLORS[t.name]),borderRadius:6,barThickness:26}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:13,weight:'500'}}}}}
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#e8f1f8'},ticks:{font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:13,weight:'500'}}}}}
   }));
   charts.push(new Chart(document.getElementById('c3'),{
     type:'bar',
@@ -312,7 +312,7 @@ function renderCompetition(){
       data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}),
       backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p'
     }))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#e8f1f8'}}}}
   }));
 }
 
@@ -364,7 +364,7 @@ function renderTeam(){
           <td class="num">${fmt(w.days)}</td>
           <td class="num">${fmt(w.returns||0)}</td>
         </tr>`).join('')}
-        <tr style="background:#f8fafc;font-weight:600">
+        <tr style="background:#f0f7fc;font-weight:600">
           <td>All weeks</td>
           <td class="num">${fmt(team.totalPoints,1)}</td>
           <td class="num">${fmt(team.avgPointsDay,2)}</td>
@@ -389,10 +389,10 @@ function renderTeam(){
 
   const latest=tw.length-1;
   const prev=latest>0?latest-1:-1;
-  charts.push(new Chart(document.getElementById('t0'),{ type:'bar', data:{ labels: prev>=0?[labels[prev], labels[latest]]:[labels[latest]], datasets:[{ data: prev>=0?[tw[prev].points, tw[latest].points]:[tw[latest].points], backgroundColor: prev>=0?['#94a3b8','#2563eb']:['#2563eb'], borderRadius:8, barThickness:40 }] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
+  charts.push(new Chart(document.getElementById('t0'),{ type:'bar', data:{ labels: prev>=0?[labels[prev], labels[latest]]:[labels[latest]], datasets:[{ data: prev>=0?[tw[prev].points, tw[latest].points]:[tw[latest].points], backgroundColor: prev>=0?['#94a3b8','#1481c3']:['#1481c3'], borderRadius:8, barThickness:40 }] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#e8f1f8'}}}} }));
   const avgPD = team.avgPointsDay;
-  charts.push(new Chart(document.getElementById('t2'),{ type:'line', data:{labels,datasets:[ {label:'Pts/day', data:tw.map(w=>w.pointsDay), borderColor:'#2563eb', backgroundColor:'#2563eb22', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5}, {label:'Avg', data:labels.map(()=>avgPD), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false} ]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
-  charts.push(new Chart(document.getElementById('t1'),{ type:'bar', data:{labels,datasets:names.map(n=>({ label:n, data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}), backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p' }))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}} }));
+  charts.push(new Chart(document.getElementById('t2'),{ type:'line', data:{labels,datasets:[ {label:'Pts/day', data:tw.map(w=>w.pointsDay), borderColor:'#1481c3', backgroundColor:'#1481c322', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5}, {label:'Avg', data:labels.map(()=>avgPD), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false} ]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#e8f1f8'}}}} }));
+  charts.push(new Chart(document.getElementById('t1'),{ type:'bar', data:{labels,datasets:names.map(n=>({ label:n, data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}), backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p' }))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#e8f1f8'}}}} }));
 }
 
 function renderTech(name){
@@ -468,7 +468,7 @@ function renderTech(name){
             <td class="num">${w.workday||'\u2014'}</td>
             <td class="num">${w.inflPoints?fmt(w.inflPoints,1):'\u2014'}</td><td class="num">${w.returns||'\u2014'}</td></tr>`;
         }).join('')}
-        <tr style="background:#f8fafc;font-weight:600"><td>Total</td><td class="num">${fmt(t.totalPoints,1)}</td><td class="num">${fmt(t.pointsDay,2)}</td><td class="num">${fmt(t.totalUnits)}</td>
+        <tr style="background:#f0f7fc;font-weight:600"><td>Total</td><td class="num">${fmt(t.totalPoints,1)}</td><td class="num">${fmt(t.pointsDay,2)}</td><td class="num">${fmt(t.totalUnits)}</td>
           <td class="num">${(t.unitTotals||{}).S||0}</td><td class="num">${(t.unitTotals||{}).W||0}</td><td class="num">${(t.unitTotals||{}).B||0}</td><td class="num">${(t.unitTotals||{}).C||0}</td>
           <td class="num">${fmt(t.totalDays)}</td><td class="num">${fmt(t.totalInflPoints,1)}</td><td class="num">${fmt(t.totalReturns)}</td></tr>
         </tbody>
@@ -482,7 +482,7 @@ function renderTech(name){
       </div>
     </div>`;
 
-  const color=TECH_COLORS[name]||'#2563eb';
+  const color=TECH_COLORS[name]||'#1481c3';
   const wl=weeks.map(w=>w.weekLabel);
   const ownAvg = t.ownAvgPointsDay || t.pointsDay;
   charts.push(new Chart(document.getElementById('p1'),{
@@ -491,15 +491,15 @@ function renderTech(name){
       {label:'Pts/day', data:weeks.map(w=>w.pointsDay), borderColor:color, backgroundColor:color+'18', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5, spanGaps:true},
       {label:'Your avg', data:wl.map(()=>ownAvg), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#e8f1f8'}}}}
   }));
-  charts.push(new Chart(document.getElementById('p2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
+  charts.push(new Chart(document.getElementById('p2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#e8f1f8'}}}}}));
   charts.push(new Chart(document.getElementById('p3'),{type:'bar',data:{labels:wl,datasets:[
-    {label:'S',data:weeks.map(w=>w.S||0),backgroundColor:'#2563eb',stack:'u'},
-    {label:'W',data:weeks.map(w=>w.W||0),backgroundColor:'#059669',stack:'u'},
-    {label:'B',data:weeks.map(w=>w.B||0),backgroundColor:'#d97706',stack:'u'},
-    {label:'C',data:weeks.map(w=>w.C||0),backgroundColor:'#7c3aed',stack:'u'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}}));
+    {label:'S',data:weeks.map(w=>w.S||0),backgroundColor:'#1481c3',stack:'u'},
+    {label:'W',data:weeks.map(w=>w.W||0),backgroundColor:'#16a34a',stack:'u'},
+    {label:'B',data:weeks.map(w=>w.B||0),backgroundColor:'#fb8e28',stack:'u'},
+    {label:'C',data:weeks.map(w=>w.C||0),backgroundColor:'#154487',stack:'u'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#e8f1f8'}}}}}));
 }
 
 function route(){
