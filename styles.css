@@ -1,28 +1,36 @@
 /* Breathe-Easy Dashboard
  * App-shell layout: nav is NOT fixed/sticky. Main is the only scroll container.
- * This eliminates spacer/clip/scroll-to-top bugs permanently.
+ * Brand colours from breathe-easyhk.com theme.
  */
 :root {
-  --bg: #fafbfc;
+  /* Breathe-Easy brand (from breathe-easyhk.com theme) */
+  --brand-navy: #154487;
+  --brand-blue: #1481c3;
+  --brand-sky: #59bcee;
+  --brand-sky-deep: #4db2ec;
+  --brand-orange: #fb8e28;
+
+  --bg: #f3f8fc;
   --surface: #ffffff;
-  --border: #e8ecf0;
-  --border-soft: #f0f3f6;
-  --text: #1a2332;
-  --text-secondary: #5a6577;
-  --text-muted: #8b95a5;
-  --primary: #2563eb;
-  --primary-soft: #eff6ff;
-  --green: #059669;
-  --green-soft: #ecfdf5;
-  --amber: #d97706;
-  --amber-soft: #fffbeb;
-  --red: #dc2626;
+  --border: #d7e6f2;
+  --border-soft: #ebf3f9;
+  --text: #12315a;
+  --text-secondary: #4a6b8a;
+  --text-muted: #7a9bb8;
+  --primary: #1481c3;
+  --primary-soft: #e6f4fb;
+  --primary-deep: #154487;
+  --green: #16a34a;
+  --green-soft: #f0fdf4;
+  --amber: #fb8e28;
+  --amber-soft: #fff7ed;
+  --red: #dc4c64;
   --red-soft: #fef2f2;
-  --blue-soft: #eff6ff;
+  --blue-soft: #e6f4fb;
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.06);
+  --shadow: 0 1px 2px rgba(21, 68, 135, 0.06);
+  --shadow-md: 0 4px 12px rgba(21, 68, 135, 0.08);
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
@@ -54,6 +62,7 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding-top: env(safe-area-inset-top, 0px);
+  box-shadow: 0 1px 0 rgba(20, 129, 195, 0.06);
 }
 
 .nav-inner {
@@ -70,13 +79,13 @@ body {
 .nav-brand {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--primary-deep);
   text-decoration: none;
   letter-spacing: -0.02em;
   white-space: nowrap;
   flex-shrink: 0;
 }
-.nav-brand span { color: var(--text-muted); font-weight: 400; }
+.nav-brand span { color: var(--brand-sky-deep); font-weight: 500; }
 
 .nav-links {
   display: flex;
@@ -117,6 +126,7 @@ body {
   font-weight: 600;
   letter-spacing: -0.03em;
   margin-bottom: 4px;
+  color: var(--primary-deep);
 }
 .page-header p { font-size: 14px; color: var(--text-muted); }
 
@@ -146,7 +156,7 @@ body {
   font-size: 22px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: var(--text);
+  color: var(--primary-deep);
   word-break: break-word;
 }
 
@@ -182,7 +192,7 @@ body {
 }
 .table-wrap::-webkit-scrollbar { height: 6px; }
 .table-wrap::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #a8c5db;
   border-radius: 999px;
 }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -196,7 +206,7 @@ thead th {
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  background: #f8fafc;
+  background: #f0f7fc;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
@@ -207,10 +217,10 @@ tbody td {
   white-space: nowrap;
 }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover { background: #fafbfc; }
+tbody tr:hover { background: #f7fbfe; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 td.name { font-weight: 500; }
-.zero-row td { background: #fffafa; }
+.zero-row td { background: #fff8f8; }
 .hide-sm { }
 
 .chart-grid {
@@ -237,7 +247,7 @@ td.name { font-weight: 500; }
 .chart-wrap { position: relative; height: 240px; width: 100%; }
 .chart-wrap.tall { height: 280px; }
 .chart-wrap.hero { height: 320px; }
-.hero-card h3 { font-size: 14px; color: var(--text); }
+.hero-card h3 { font-size: 14px; color: var(--primary-deep); }
 
 .unit-chips {
   display: flex;
@@ -255,7 +265,7 @@ td.name { font-weight: 500; }
   box-shadow: var(--shadow);
 }
 .unit-chip .ut { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-.unit-chip .uv { font-size: 16px; font-weight: 600; margin-top: 2px; }
+.unit-chip .uv { font-size: 16px; font-weight: 600; margin-top: 2px; color: var(--primary-deep); }
 
 .points-ref {
   background: var(--surface);
@@ -266,7 +276,7 @@ td.name { font-weight: 500; }
   overflow-x: auto;
 }
 .points-ref table { font-size: 13px; width: 100%; }
-.points-ref th { background: #f8fafc; }
+.points-ref th { background: #f0f7fc; }
 
 .note { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
 .scroll-hint {
@@ -327,7 +337,7 @@ td.name { font-weight: 500; }
   font-weight: 650;
   letter-spacing: -0.04em;
   line-height: 1;
-  color: var(--text);
+  color: var(--primary-deep);
   font-variant-numeric: tabular-nums;
 }
 .story-hero-label {
@@ -419,11 +429,11 @@ td.name { font-weight: 500; }
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.rank-mode-btn:hover { color: var(--text); border-color: #c5cdd8; }
+.rank-mode-btn:hover { color: var(--text); border-color: #b5d0e4; }
 .rank-mode-btn.active {
   color: var(--primary);
   background: var(--primary-soft);
-  border-color: #bfdbfe;
+  border-color: #a3d4ef;
   font-weight: 600;
 }
 .rank-mode-hint {
