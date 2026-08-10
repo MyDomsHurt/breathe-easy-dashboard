@@ -8,60 +8,39 @@ Soft-minimal points dashboard for Breathe-Easy technicians (Hong Kong AC service
 
 | Route | Purpose |
 |-------|--------|
-| `#/compete` | Head-to-head rankings by Pts/Day, This Week, Month, or Quarter |
-| `#/team` | **Full Team** — collective output, no rankings |
+| `#/compete` | Rankings by Pts/Day, This Week, Month, or Quarter |
+| `#/team` | Full Team — collective output, no rankings |
 | `#/tech/{Name}` | Personal profile (Matthew, Nick, Iggi, Alun, Tiago) |
 
-Josh is excluded. **No revenue** in the UI or ranking metrics.
+Josh excluded. **No revenue** in the UI.
 
-## Primary metrics
+## Layout (scroll architecture)
 
-- **Points** (volume / effort)
-- **Pts / Day** (pace)
-- Timescales: day · week · month · quarter
+**App shell — do not regress:**
 
-## Points system
+- `body` is a full-viewport **flex column** with `overflow: hidden`
+- `nav` is **in normal document flow** (`position: relative`) — never `fixed` or `sticky`
+- `#app` (`.main`) is the **only scroll container** (`flex: 1; min-height: 0; overflow-y: auto`)
+- There is **no nav spacer** and no measured header offset
 
-| Unit | Points | Note |
-|------|--------|------|
-| S | 1.00 | Baseline |
-| W | 0.85 | Lower density |
-| B | 1.15 | Medium-high |
-| C | 1.80 | High complexity |
-| UC | 1.30 | |
-| TV / OU | 1.40 | |
-| SwG | 1.30 | |
-| EF / PAU | 1.00 | |
+This design makes it impossible for content to sit under the nav, which was the root of the long-running mobile scroll bugs.
 
-Influencer (free) units receive the **same points** as paid units of the same type.
-
-## Architecture
+## Files
 
 | File | Role |
 |------|------|
-| `index.html` | Shell + Chart.js CDN |
-| `styles.css` | Soft minimal UI, mobile fixed nav + spacer |
+| `index.html` | Shell |
+| `styles.css` | App shell + UI |
 | `app.js` | Routing, aggregation, charts |
-| `data.json` | Team totals, ranking, points table |
-| `weeks.json` | Per-technician week rows (merged at load) |
+| `data.json` | Totals, ranking, points table |
+| `weeks.json` | Week-by-week rows (merged at load) |
 
-### Mobile nav
+## Points
 
-- Desktop: `position: sticky`
-- Mobile (≤768px): `position: fixed` + `#nav-spacer` height measured in JS (`syncNavSpacer`)
-- Do **not** set `overflow-x: hidden` on `body` (breaks sticky/scroll)
-- Route changes call `scrollTopAndSync()`
+S 1.00 · W 0.85 · B 1.15 · C 1.80 · UC 1.30 · TV/OU 1.40 · SwG 1.30 · EF/PAU 1.00
 
-### Charts
-
-- One **hero** chart per page; supporting charts secondary
-- Bars = volume; lines = pace; stacks = contribution
-- Personal pace chart includes own-average reference line
+Influencer units = same points as paid.
 
 ## Update data
 
-1. Edit `data.json` and/or `weeks.json`
-2. Commit and push to `main`
-3. GitHub Pages deploys automatically
-
-Keep the data split: totals/ranking in `data.json`, time series in `weeks.json`.
+Edit `data.json` / `weeks.json`, push to `main`. GitHub Pages deploys automatically.
