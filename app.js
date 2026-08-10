@@ -16,6 +16,16 @@ async function loadData(){
   }
 }
 
+function syncNavSpacer(){
+  const nav=document.querySelector('.nav');
+  const spacer=document.getElementById('nav-spacer');
+  if(!nav||!spacer) return;
+  if(window.matchMedia('(max-width: 768px)').matches){
+    spacer.style.height=nav.offsetHeight+'px';
+  } else {
+    spacer.style.height='';
+  }
+}
 function setNav(active){
   const links=[
     {href:'#/compete',label:'Competition'},
@@ -26,6 +36,7 @@ function setNav(active){
     const isActive = active===l.href || (l.href!=='#/compete' && l.href!=='#/team' && active.startsWith(l.href));
     return `<a href="${l.href}" class="${isActive?'active':''}">${l.label}</a>`;
   }).join('');
+  requestAnimationFrame(syncNavSpacer);
 }
 
 function rankByPtsDay(){
@@ -314,7 +325,7 @@ function renderTech(name){
   const color=TECH_COLORS[name]||'#2563eb';
   const wl=weeks.map(w=>w.weekLabel);
   charts.push(new Chart(document.getElementById('p1'),{type:'line',data:{labels:wl,datasets:[{data:weeks.map(w=>w.pointsDay),borderColor:color,backgroundColor:color+'18',fill:true,tension:0.3,pointRadius:5,borderWidth:2.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
-  charts.push(new Chart(document.getElementById('p2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
+  charts.push(new Chart(document.getElementById('p2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),borderColor:color,backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
   charts.push(new Chart(document.getElementById('p3'),{type:'bar',data:{labels:wl,datasets:[
     {label:'S',data:weeks.map(w=>w.S||0),backgroundColor:'#2563eb',stack:'u'},
     {label:'W',data:weeks.map(w=>w.W||0),backgroundColor:'#059669',stack:'u'},
@@ -330,4 +341,4 @@ function route(){
   else renderCompetition();
 }
 document.body.style.paddingTop='';
-loadData().then(()=>{route();window.addEventListener('hashchange',route);});
+loadData().then(()=>{route();window.addEventListener('hashchange',route);window.addEventListener('resize',syncNavSpacer);});
