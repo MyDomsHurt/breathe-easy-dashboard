@@ -193,7 +193,6 @@ function teamStory(stats, scale, tw){
   if(isBest) chips.push(`<span class="story-chip best">Best week so far</span>`);
   if(stats.returns===0) chips.push(`<span class="story-chip clean">No returns</span>`);
   else chips.push(`<span class="story-chip mild">${fmt(stats.returns)} returns</span>`);
-
   return `
     <div class="story-top">
       <div class="story-period">${stats.label}</div>
@@ -413,7 +412,11 @@ function renderTech(name){
   const quarterShort=quarterLabel(quarterKey);
   const quarterPts=techQuarterPoints(name, quarterKey);
   const monthShort=monthLabel(currentMonthKey());
-  const gapLine = rank===1 ? `<div class="progress-item">Rank: <strong>#1 efficiency</strong></div>` : `<div class="progress-item">Rank: <strong>#${rank}</strong> \u00b7 ${fmt(gap,2)} pts/day behind</div>`;
+  const rankLabel = rank===1
+    ? 'Leading on pts/day'
+    : `#${rank} \u00b7 ${fmt(gap,2)} pts/day behind`;
+  const ownClass = vsOwn>=0 ? 'up' : 'down';
+  const teamClass = vs>=0 ? 'up' : 'down';
 
   document.getElementById('app').innerHTML=`
     <div class="page-header"><h1>${t.name}</h1><p>Personal performance profile</p></div>
@@ -423,14 +426,32 @@ function renderTech(name){
       <div class="kpi-card"><div class="label">${monthShort}</div><div class="value">${fmt(monthPts,1)}</div></div>
       <div class="kpi-card"><div class="label">${quarterShort}</div><div class="value">${fmt(quarterPts,1)}</div></div>
     </div>
-    <div class="progress-strip">
-      ${badge(t.trend)}
-      ${gapLine}
-      <div class="progress-item">vs your avg: <strong style="color:${vsOwn>=0?'var(--green)':'var(--red)'}">${pct(vsOwn)}</strong></div>
-      <div class="progress-item">vs team: <strong style="color:${vs>=0?'var(--green)':'var(--red)'}">${pct(vs)}</strong></div>
-      <div class="progress-item">Best week: <strong>${fmt(t.bestPointsDay,2)}</strong> pts/day</div>
-      <div class="progress-item">Returns: <strong>${fmt(t.totalReturns)}</strong></div>
+
+    <div class="profile-status">
+      <div class="profile-status-top">
+        ${badge(t.trend)}
+        <div class="profile-rank">${rankLabel}</div>
+      </div>
+      <div class="profile-status-grid">
+        <div class="profile-metric">
+          <div class="profile-metric-value ${ownClass}">${pct(vsOwn)}</div>
+          <div class="profile-metric-label">vs your average</div>
+        </div>
+        <div class="profile-metric">
+          <div class="profile-metric-value ${teamClass}">${pct(vs)}</div>
+          <div class="profile-metric-label">vs team average</div>
+        </div>
+        <div class="profile-metric">
+          <div class="profile-metric-value">${fmt(t.bestPointsDay,2)}</div>
+          <div class="profile-metric-label">Best week pts/day</div>
+        </div>
+        <div class="profile-metric">
+          <div class="profile-metric-value">${fmt(t.totalReturns)}</div>
+          <div class="profile-metric-label">Returns</div>
+        </div>
+      </div>
     </div>
+
     <div class="section"><div class="section-title">Unit mix</div>
       <div class="unit-chips">${unitOrder.filter(u=>(t.unitTotals||{})[u]>0).map(u=>`<div class="unit-chip"><div class="ut">${u}</div><div class="uv">${fmt(t.unitTotals[u])}</div></div>`).join('')}</div>
     </div>
