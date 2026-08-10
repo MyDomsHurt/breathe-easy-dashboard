@@ -8,10 +8,9 @@ Soft-minimal points competition dashboard for Breathe-Easy technicians.
 
 - **Overview** — team KPIs, competition table, charts, points system
 - **Individual profiles** — Matthew, Nick, Iggi, Alun, Tiago
-- Primary metrics: **Points** and **Points / Day** (fair efficiency)
-- Josh (director) excluded
-- Influencer (free) units count full points
-- No revenue displayed
+- Primary metrics: **Points** and **Points / Day**
+- Josh excluded; influencer units count full points
+- No revenue on the dashboard
 
 ## Points
 
@@ -30,15 +29,19 @@ Soft-minimal points competition dashboard for Breathe-Easy technicians.
 
 | File | Role |
 |------|------|
-| `index.html` | Shell |
+| `index.html` | Page shell |
 | `styles.css` | Layout + mobile |
 | `app.js` | UI, charts, routing |
-| `data.json` | All metrics + week detail |
+| `data.json` | Team totals, ranking, points table |
+| `weeks.json` | Per-technician week-by-week rows |
+
+`app.js` loads both JSON files and merges week rows onto each technician at runtime.
 
 ## Update data
 
-Edit `data.json` (or regenerate from Service Output) and commit to `main`.
-GitHub Pages updates within a minute or two.
+1. Update `data.json` (totals / ranking)
+2. Update `weeks.json` (week detail)
+3. Commit to `main` — Pages refreshes in 1–2 minutes
 
 ## Local
 
