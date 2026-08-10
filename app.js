@@ -1,6 +1,6 @@
 /* Breathe-Easy Dashboard */
 const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3aed',Tiago:'#0891b2'};
-let DATA=null, charts=[];
+let DATA=null, charts=[], RANK_MODE='day'; // day | week | month | season
 
 function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
 function fmt(n,d=0){if(n==null||isNaN(n))return'\u2014';return Number(n).toLocaleString('en-HK',{maximumFractionDigits:d,minimumFractionDigits:d});}
@@ -39,9 +39,6 @@ function setNav(active){
   requestAnimationFrame(syncNavSpacer);
 }
 
-function rankByPtsDay(){
-  return [...DATA.ranking].sort((a,b)=>b.pointsDay-a.pointsDay);
-}
 function gapToNext(sorted, i){
   if(i===0) return null;
   return sorted[i-1].pointsDay - sorted[i].pointsDay;
@@ -74,6 +71,41 @@ function monthLabel(monthKey){
   const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return names[parseInt(m,10)-1]+' '+y;
 }
+function enrichTech(t){
+  const latestWk=latestWeekKey();
+  const monthKey=currentMonthKey();
+  let monthDays=0;
+  for(const r of (DATA.technicians[t.name].weeks||[])){
+    if(weekMonth(r.week)===monthKey) monthDays+=(r.workday||0);
+  }
+  return Object.assign({}, t, {
+    weekPts: techWeekPoints(t.name, latestWk),
+    monthPts: techMonthPoints(t.name, monthKey),
+    monthDays: monthDays
+  });
+}
+function rankMetricKey(mode){
+  return ({day:'pointsDay', week:'weekPts', month:'monthPts', season:'totalPoints'})[mode]||'pointsDay';
+}
+function rankMetricLabel(mode, monthShort){
+  return ({day:'Pts/Day', week:'This Week', month:(monthShort||'Month'), season:'Season'})[mode]||'Pts/Day';
+}
+function rankBy(mode){
+  const key=rankMetricKey(mode);
+  return DATA.ranking.map(enrichTech).sort((a,b)=>(b[key]||0)-(a[key]||0));
+}
+function rankByPtsDay(){
+  return rankBy('day');
+}
+function gapOnMetric(sorted, i, mode){
+  if(i===0) return null;
+  const key=rankMetricKey(mode);
+  return (sorted[i-1][key]||0)-(sorted[i][key]||0);
+}
+function fmtMetric(mode, v){
+  if(mode==='day') return fmt(v,2);
+  return fmt(v,1);
+}
 function teamWeekly(){
   const weeks=DATA.weeks||[];
   const names=Object.keys(DATA.technicians);
@@ -99,52 +131,78 @@ function teamUnitTotals(){
 function renderCompetition(){
   destroyCharts();
   setNav('#/compete');
-  const sorted=rankByPtsDay();
+  const mode = RANK_MODE || 'day';
   const labels=DATA.weekLabels;
   const weeks=DATA.weeks;
   const names=Object.keys(DATA.technicians);
   const latestWk=latestWeekKey();
   const monthKey=currentMonthKey();
   const monthShort=monthLabel(monthKey);
+  const sorted=rankBy(mode);
+  const metricKey=rankMetricKey(mode);
+  const metricLabel=rankMetricLabel(mode, monthShort);
+
+  const modeBtn = (id, label) =>
+    `<button type="button" class="rank-mode-btn ${mode===id?'active':''}" data-mode="${id}">${label}</button>`;
 
   document.getElementById('app').innerHTML=`
     <div class="page-header">
       <h1>Competition</h1>
-      <p>Individual ranking \u00b7 Pace <strong>and</strong> output \u00b7 Updated ${DATA.generated}</p>
+      <p>Pick the timescale you want to compete on \u00b7 Updated ${DATA.generated}</p>
     </div>
 
+    <div class="rank-modes" id="rank-modes">
+      ${modeBtn('day', 'Pts / Day')}
+      ${modeBtn('week', 'This Week')}
+      ${modeBtn('month', monthShort)}
+      ${modeBtn('season', 'Season')}
+    </div>
+    <p class="rank-mode-hint">
+      ${mode==='day' ? 'Pace \u2014 fair when people work different numbers of days.' : ''}
+      ${mode==='week' ? 'Output this week \u2014 more days worked counts. Full points for the week.' : ''}
+      ${mode==='month' ? 'Output this month \u2014 more days worked counts. Full points for '+monthShort+'.' : ''}
+      ${mode==='season' ? 'Full period total points \u2014 cumulative output.' : ''}
+    </p>
+
     <div class="section">
-      <div class="section-title">Leaderboard</div>
+      <div class="section-title">Leaderboard \u00b7 ${metricLabel}</div>
       <div class="table-wrap"><table>
         <thead><tr>
           <th>#</th><th>Technician</th>
-          <th class="num">Pts/Day</th>
-          <th class="num">This Week</th>
-          <th class="num">${monthShort}</th>
-          <th class="num hide-sm">Season</th>
+          <th class="num">${metricLabel}</th>
+          <th class="num ${mode==='day'?'':'hide-sm'}">Pts/Day</th>
+          <th class="num ${mode==='week'?'':'hide-sm'}">This Week</th>
+          <th class="num ${mode==='month'?'':'hide-sm'}">${monthShort}</th>
+          <th class="num ${mode==='season'?'':'hide-sm'}">Season</th>
+          <th class="num hide-sm">Gap</th>
           <th>Trend</th>
         </tr></thead>
         <tbody>${sorted.map((t,i)=>{
-          const weekPts=techWeekPoints(t.name, latestWk);
-          const monthPts=techMonthPoints(t.name, monthKey);
+          const gap=gapOnMetric(sorted,i,mode);
+          const gapHtml=i===0
+            ? `<span style="color:var(--green);font-weight:600">Lead</span>`
+            : `<span style="color:var(--text-muted)">${fmtMetric(mode, gap)} behind</span>`;
+          const primary=t[metricKey];
           return `<tr>
             <td>${i+1}</td>
             <td class="name"><a href="#/tech/${t.name}" style="color:inherit;text-decoration:none">${t.name}</a></td>
-            <td class="num"><strong>${fmt(t.pointsDay,2)}</strong></td>
-            <td class="num"><strong>${fmt(weekPts,1)}</strong></td>
-            <td class="num"><strong>${fmt(monthPts,1)}</strong></td>
-            <td class="num hide-sm">${fmt(t.totalPoints,1)}</td>
+            <td class="num"><strong>${fmtMetric(mode, primary)}</strong></td>
+            <td class="num ${mode==='day'?'':'hide-sm'}">${fmt(t.pointsDay,2)}</td>
+            <td class="num ${mode==='week'?'':'hide-sm'}">${fmt(t.weekPts,1)}</td>
+            <td class="num ${mode==='month'?'':'hide-sm'}">${fmt(t.monthPts,1)}</td>
+            <td class="num ${mode==='season'?'':'hide-sm'}">${fmt(t.totalPoints,1)}</td>
+            <td class="num hide-sm">${gapHtml}</td>
             <td>${badge(t.trend)}</td>
           </tr>`;
         }).join('')}</tbody>
       </table></div>
-      <p class="note">Pts/Day = pace (fair if days differ). This Week & ${monthShort} = output \u2014 more days worked still counts as merit. Ranked by Pts/Day.</p>
+      <p class="note">All four timescales are valid ways to compete. Switch the tabs above to re-rank.</p>
     </div>
 
     <div class="section">
-      <div class="section-title">Head-to-head</div>
+      <div class="section-title">Head-to-head \u00b7 ${metricLabel}</div>
       <div class="chart-grid">
-        <div class="chart-card"><h3>Pts / day ranking</h3><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
+        <div class="chart-card"><h3>${metricLabel} ranking</h3><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
         <div class="chart-card"><h3>Season points share</h3><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
         <div class="chart-card full"><h3>Points by week</h3><div class="chart-wrap tall"><canvas id="c3"></canvas></div></div>
       </div>
@@ -159,9 +217,16 @@ function renderCompetition(){
       <p class="note">Influencer (free) units receive the same points as paid units of the same type.</p></div>
     </div>`;
 
+  document.getElementById('rank-modes').addEventListener('click', (e)=>{
+    const btn=e.target.closest('[data-mode]');
+    if(!btn) return;
+    RANK_MODE=btn.getAttribute('data-mode');
+    renderCompetition();
+  });
+
   charts.push(new Chart(document.getElementById('c1'),{
     type:'bar',
-    data:{labels:sorted.map(t=>t.name),datasets:[{data:sorted.map(t=>t.pointsDay),backgroundColor:sorted.map(t=>TECH_COLORS[t.name]),borderRadius:6,barThickness:22}]},
+    data:{labels:sorted.map(t=>t.name),datasets:[{data:sorted.map(t=>t[metricKey]),backgroundColor:sorted.map(t=>TECH_COLORS[t.name]),borderRadius:6,barThickness:22}]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:12}}}}}
   }));
 
