@@ -308,6 +308,22 @@ td.name { font-weight: 500; }
   margin: -8px 0 10px;
 }
 
+.team-story {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow);
+}
+.team-story strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .rank-modes {
   display: flex;
   flex-wrap: wrap;
