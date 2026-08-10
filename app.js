@@ -21,10 +21,20 @@ function syncNavSpacer(){
   const spacer=document.getElementById('nav-spacer');
   if(!nav||!spacer) return;
   if(window.matchMedia('(max-width: 768px)').matches){
-    spacer.style.height=nav.offsetHeight+'px';
+    const h=Math.ceil(nav.getBoundingClientRect().height);
+    spacer.style.display='block';
+    spacer.style.height=h+'px';
   } else {
-    spacer.style.height='';
+    spacer.style.display='none';
+    spacer.style.height='0px';
   }
+}
+function afterPaint(fn){
+  requestAnimationFrame(()=>requestAnimationFrame(fn));
+}
+function scrollTopAndSync(){
+  window.scrollTo(0,0);
+  afterPaint(()=>{ window.scrollTo(0,0); syncNavSpacer(); });
 }
 function setNav(active){
   const links=[
@@ -36,7 +46,7 @@ function setNav(active){
     const isActive = active===l.href || (l.href!=='#/compete' && l.href!=='#/team' && active.startsWith(l.href));
     return `<a href="${l.href}" class="${isActive?'active':''}">${l.label}</a>`;
   }).join('');
-  requestAnimationFrame(syncNavSpacer);
+  afterPaint(()=>{ syncNavSpacer(); });
 }
 
 function gapToNext(sorted, i){
@@ -285,9 +295,8 @@ function renderCompetition(){
     <div class="section">
       <div class="section-title">Head-to-head \u00b7 ${metricLabel}</div>
       <div class="chart-grid">
-        <div class="chart-card"><h3>${metricLabel} ranking</h3><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
-        <div class="chart-card"><h3>${quarterShort} share</h3><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
-        <div class="chart-card full"><h3>Points by week</h3><div class="chart-wrap tall"><canvas id="c3"></canvas></div></div>
+        <div class="chart-card full hero-card"><h3>Who leads on ${metricLabel}?</h3><div class="chart-wrap hero"><canvas id="c1"></canvas></div></div>
+        <div class="chart-card full"><h3>Weekly points \u2014 each technician</h3><div class="chart-wrap tall"><canvas id="c3"></canvas></div></div>
       </div>
     </div>
     <div class="section">
@@ -306,10 +315,21 @@ function renderCompetition(){
     renderCompetition();
   });
 
-  charts.push(new Chart(document.getElementById('c1'),{ type:'bar', data:{labels:sorted.map(t=>t.name),datasets:[{data:sorted.map(t=>t[metricKey]),backgroundColor:sorted.map(t=>TECH_COLORS[t.name]),borderRadius:6,barThickness:22}]}, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}} }));
-  const byQ=DATA.ranking.map(enrichTech).sort((a,b)=>b.quarterPts-a.quarterPts);
-  charts.push(new Chart(document.getElementById('c2'),{ type:'doughnut', data:{labels:byQ.map(t=>t.name),datasets:[{data:byQ.map(t=>t.quarterPts),backgroundColor:byQ.map(t=>TECH_COLORS[t.name]),borderWidth:0}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},cutout:'62%'} }));
-  charts.push(new Chart(document.getElementById('c3'),{ type:'bar', data:{labels,datasets:names.map(n=>({ label:n, data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}), backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p' }))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}} }));
+  charts.push(new Chart(document.getElementById('c1'),{
+    type:'bar',
+    data:{labels:sorted.map(t=>t.name),datasets:[{data:sorted.map(t=>t[metricKey]),backgroundColor:sorted.map(t=>TECH_COLORS[t.name]),borderRadius:6,barThickness:26}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:13,weight:'500'}}}}}
+  }));
+  charts.push(new Chart(document.getElementById('c3'),{
+    type:'bar',
+    data:{labels,datasets:names.map(n=>({
+      label:n,
+      data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}),
+      backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p'
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}
+  }));
+  afterPaint(syncNavSpacer);
 }
 
 function renderTeam(){
@@ -343,10 +363,9 @@ function renderTeam(){
     <div class="section">
       <div class="section-title">Charts</div>
       <div class="chart-grid">
+        <div class="chart-card full hero-card"><h3>What we put up each week</h3><div class="chart-wrap hero"><canvas id="t1"></canvas></div></div>
         <div class="chart-card"><h3>This week vs last week</h3><div class="chart-wrap"><canvas id="t0"></canvas></div></div>
-        <div class="chart-card"><h3>Crew pace (pts/day)</h3><div class="chart-wrap"><canvas id="t2"></canvas></div></div>
-        <div class="chart-card full"><h3>What we put up each week</h3><div class="chart-wrap tall"><canvas id="t1"></canvas></div></div>
-        <div class="chart-card full"><h3>Team points by week</h3><div class="chart-wrap"><canvas id="t3"></canvas></div></div>
+        <div class="chart-card"><h3>Are we pacing above average?</h3><div class="chart-wrap"><canvas id="t2"></canvas></div></div>
       </div>
     </div>
     <div class="section">
@@ -390,7 +409,7 @@ function renderTeam(){
   const avgPD = team.avgPointsDay;
   charts.push(new Chart(document.getElementById('t2'),{ type:'line', data:{labels,datasets:[ {label:'Pts/day', data:tw.map(w=>w.pointsDay), borderColor:'#2563eb', backgroundColor:'#2563eb22', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5}, {label:'Avg', data:labels.map(()=>avgPD), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false} ]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
   charts.push(new Chart(document.getElementById('t1'),{ type:'bar', data:{labels,datasets:names.map(n=>({ label:n, data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}), backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p' }))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}} }));
-  charts.push(new Chart(document.getElementById('t3'),{ type:'bar', data:{labels,datasets:[{ label:'Team points', data:tw.map(w=>w.points), backgroundColor:'#059669', borderRadius:6, barThickness:28 }]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
+  afterPaint(syncNavSpacer);
 }
 
 function renderTech(name){
@@ -474,15 +493,23 @@ function renderTech(name){
     </div>
     <div class="section"><div class="section-title">Your charts</div>
       <div class="chart-grid">
-        <div class="chart-card"><h3>Points / day</h3><div class="chart-wrap"><canvas id="p1"></canvas></div></div>
-        <div class="chart-card"><h3>Points by week</h3><div class="chart-wrap"><canvas id="p2"></canvas></div></div>
-        <div class="chart-card full"><h3>Unit mix (S/W/B/C)</h3><div class="chart-wrap tall"><canvas id="p3"></canvas></div></div>
+        <div class="chart-card full hero-card"><h3>Your pace vs your average</h3><div class="chart-wrap hero"><canvas id="p1"></canvas></div></div>
+        <div class="chart-card"><h3>Your points each week</h3><div class="chart-wrap"><canvas id="p2"></canvas></div></div>
+        <div class="chart-card"><h3>Unit mix by week</h3><div class="chart-wrap"><canvas id="p3"></canvas></div></div>
       </div>
     </div>`;
 
   const color=TECH_COLORS[name]||'#2563eb';
   const wl=weeks.map(w=>w.weekLabel);
-  charts.push(new Chart(document.getElementById('p1'),{type:'line',data:{labels:wl,datasets:[{data:weeks.map(w=>w.pointsDay),borderColor:color,backgroundColor:color+'18',fill:true,tension:0.3,pointRadius:5,borderWidth:2.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
+  const ownAvg = t.ownAvgPointsDay || t.pointsDay;
+  charts.push(new Chart(document.getElementById('p1'),{
+    type:'line',
+    data:{labels:wl,datasets:[
+      {label:'Pts/day', data:weeks.map(w=>w.pointsDay), borderColor:color, backgroundColor:color+'18', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5, spanGaps:true},
+      {label:'Your avg', data:wl.map(()=>ownAvg), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
+  }));
   charts.push(new Chart(document.getElementById('p2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
   charts.push(new Chart(document.getElementById('p3'),{type:'bar',data:{labels:wl,datasets:[
     {label:'S',data:weeks.map(w=>w.S||0),backgroundColor:'#2563eb',stack:'u'},
@@ -490,6 +517,7 @@ function renderTech(name){
     {label:'B',data:weeks.map(w=>w.B||0),backgroundColor:'#d97706',stack:'u'},
     {label:'C',data:weeks.map(w=>w.C||0),backgroundColor:'#7c3aed',stack:'u'}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}}));
+  afterPaint(syncNavSpacer);
 }
 
 function route(){
@@ -497,6 +525,14 @@ function route(){
   if(hash.startsWith('#/tech/')) renderTech(decodeURIComponent(hash.replace('#/tech/','')));
   else if(hash==='#/team') renderTeam();
   else renderCompetition();
+  scrollTopAndSync();
 }
 document.body.style.paddingTop='';
-loadData().then(()=>{route();window.addEventListener('hashchange',route);window.addEventListener('resize',syncNavSpacer);});
+loadData().then(()=>{
+  route();
+  window.addEventListener('hashchange', route);
+  window.addEventListener('resize', ()=>{ syncNavSpacer(); });
+  window.addEventListener('orientationchange', ()=>{ afterPaint(syncNavSpacer); });
+  afterPaint(syncNavSpacer);
+  setTimeout(syncNavSpacer, 300);
+});
