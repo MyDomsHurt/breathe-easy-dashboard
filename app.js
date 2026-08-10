@@ -46,6 +46,34 @@ function gapToNext(sorted, i){
   if(i===0) return null;
   return sorted[i-1].pointsDay - sorted[i].pointsDay;
 }
+function weekMonth(weekStr){
+  return (weekStr||'').slice(0,7);
+}
+function latestWeekKey(){
+  const w=DATA.weeks||[];
+  return w.length?w[w.length-1]:null;
+}
+function currentMonthKey(){
+  const lw=latestWeekKey();
+  return lw?weekMonth(lw):null;
+}
+function techWeekPoints(name, weekKey){
+  const r=(DATA.technicians[name].weeks||[]).find(x=>x.week===weekKey);
+  return r? (r.points||0) : 0;
+}
+function techMonthPoints(name, monthKey){
+  let sum=0;
+  for(const r of (DATA.technicians[name].weeks||[])){
+    if(weekMonth(r.week)===monthKey) sum+=(r.points||0);
+  }
+  return sum;
+}
+function monthLabel(monthKey){
+  if(!monthKey) return 'Month';
+  const [y,m]=monthKey.split('-');
+  const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return names[parseInt(m,10)-1]+' '+y;
+}
 function teamWeekly(){
   const weeks=DATA.weeks||[];
   const names=Object.keys(DATA.technicians);
@@ -75,11 +103,14 @@ function renderCompetition(){
   const labels=DATA.weekLabels;
   const weeks=DATA.weeks;
   const names=Object.keys(DATA.technicians);
+  const latestWk=latestWeekKey();
+  const monthKey=currentMonthKey();
+  const monthShort=monthLabel(monthKey);
 
   document.getElementById('app').innerHTML=`
     <div class="page-header">
       <h1>Competition</h1>
-      <p>Individual ranking \u00b7 Fair score is <strong>Pts / Day</strong> \u00b7 Updated ${DATA.generated}</p>
+      <p>Individual ranking \u00b7 Pace <strong>and</strong> output \u00b7 Updated ${DATA.generated}</p>
     </div>
 
     <div class="section">
@@ -88,29 +119,26 @@ function renderCompetition(){
         <thead><tr>
           <th>#</th><th>Technician</th>
           <th class="num">Pts/Day</th>
-          <th class="num">Points</th>
-          <th class="num hide-sm">vs Own Avg</th>
-          <th class="num hide-sm">Gap</th>
+          <th class="num">This Week</th>
+          <th class="num">${monthShort}</th>
+          <th class="num hide-sm">Season</th>
           <th>Trend</th>
         </tr></thead>
         <tbody>${sorted.map((t,i)=>{
-          const vsOwn=t.ownAvgPointsDay?(t.pointsDay/t.ownAvgPointsDay-1):0;
-          const gap=gapToNext(sorted,i);
-          const gapHtml=i===0
-            ? `<span style="color:var(--green);font-weight:600">Lead</span>`
-            : `<span style="color:var(--text-muted)">${fmt(gap,2)} behind</span>`;
+          const weekPts=techWeekPoints(t.name, latestWk);
+          const monthPts=techMonthPoints(t.name, monthKey);
           return `<tr>
             <td>${i+1}</td>
             <td class="name"><a href="#/tech/${t.name}" style="color:inherit;text-decoration:none">${t.name}</a></td>
             <td class="num"><strong>${fmt(t.pointsDay,2)}</strong></td>
-            <td class="num">${fmt(t.totalPoints,1)}</td>
-            <td class="num hide-sm" style="color:${vsOwn>=0?'var(--green)':'var(--red)'}">${pct(vsOwn)}</td>
-            <td class="num hide-sm">${gapHtml}</td>
+            <td class="num"><strong>${fmt(weekPts,1)}</strong></td>
+            <td class="num"><strong>${fmt(monthPts,1)}</strong></td>
+            <td class="num hide-sm">${fmt(t.totalPoints,1)}</td>
             <td>${badge(t.trend)}</td>
           </tr>`;
         }).join('')}</tbody>
       </table></div>
-      <p class="note">Ranked by Pts/Day so different workdays stay fair. Gap = distance to the person above you.</p>
+      <p class="note">Pts/Day = pace (fair if days differ). This Week & ${monthShort} = output \u2014 more days worked still counts as merit. Ranked by Pts/Day.</p>
     </div>
 
     <div class="section">
@@ -118,7 +146,7 @@ function renderCompetition(){
       <div class="chart-grid">
         <div class="chart-card"><h3>Pts / day ranking</h3><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
         <div class="chart-card"><h3>Season points share</h3><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
-        <div class="chart-card full"><h3>Pts / day by week</h3><div class="chart-wrap tall"><canvas id="c3"></canvas></div></div>
+        <div class="chart-card full"><h3>Points by week</h3><div class="chart-wrap tall"><canvas id="c3"></canvas></div></div>
       </div>
     </div>
 
@@ -145,13 +173,13 @@ function renderCompetition(){
   }));
 
   charts.push(new Chart(document.getElementById('c3'),{
-    type:'line',
+    type:'bar',
     data:{labels,datasets:names.map(n=>({
       label:n,
-      data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.pointsDay:0;}),
-      borderColor:TECH_COLORS[n],backgroundColor:TECH_COLORS[n],tension:0.3,pointRadius:4,borderWidth:2,spanGaps:false
+      data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}),
+      backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p'
     }))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}
   }));
 }
 
@@ -166,6 +194,11 @@ function renderTeam(){
   const unitTotals=teamUnitTotals();
   const unitOrder=['S','W','B','C','UC','SwG','TV','OU'];
   const unitChips=unitOrder.filter(u=>(unitTotals[u]||0)>0);
+  const latestWk=latestWeekKey();
+  const monthKey=currentMonthKey();
+  const monthShort=monthLabel(monthKey);
+  const teamWeekPts=names.reduce((s,n)=>s+techWeekPoints(n,latestWk),0);
+  const teamMonthPts=names.reduce((s,n)=>s+techMonthPoints(n,monthKey),0);
 
   document.getElementById('app').innerHTML=`
     <div class="page-header">
@@ -176,8 +209,8 @@ function renderTeam(){
     <div class="kpi-row">
       <div class="kpi-card"><div class="label">Team Points</div><div class="value">${fmt(team.totalPoints,1)}</div></div>
       <div class="kpi-card"><div class="label">Team Pts / Day</div><div class="value">${fmt(team.avgPointsDay,2)}</div></div>
-      <div class="kpi-card"><div class="label">Total Units</div><div class="value">${fmt(team.totalUnits)}</div></div>
-      <div class="kpi-card"><div class="label">Workdays</div><div class="value">${fmt(team.totalDays)}</div></div>
+      <div class="kpi-card"><div class="label">This Week</div><div class="value">${fmt(teamWeekPts,1)}</div></div>
+      <div class="kpi-card"><div class="label">${monthShort}</div><div class="value">${fmt(teamMonthPts,1)}</div></div>
     </div>
 
     <div class="section">
@@ -267,6 +300,11 @@ function renderTech(name){
   const vs=team.avgPointsDay?(t.pointsDay/team.avgPointsDay-1):0;
   const weeks=t.weeks||[];
   const unitOrder=['S','W','B','C','UC','SwG','TV','OU'];
+  const latestWk=latestWeekKey();
+  const monthKey=currentMonthKey();
+  const monthShort=monthLabel(monthKey);
+  const weekPts=techWeekPoints(name, latestWk);
+  const monthPts=techMonthPoints(name, monthKey);
 
   const gapLine = rank===1
     ? `<div class="progress-item">Rank: <strong>#1 efficiency</strong></div>`
@@ -277,9 +315,9 @@ function renderTech(name){
 
     <div class="kpi-row">
       <div class="kpi-card"><div class="label">Pts / Day</div><div class="value">${fmt(t.pointsDay,2)}</div></div>
-      <div class="kpi-card"><div class="label">Total Points</div><div class="value">${fmt(t.totalPoints,1)}</div></div>
-      <div class="kpi-card"><div class="label">Total Units</div><div class="value">${fmt(t.totalUnits)}</div></div>
-      <div class="kpi-card"><div class="label">Workdays</div><div class="value">${fmt(t.totalDays)}</div></div>
+      <div class="kpi-card"><div class="label">This Week</div><div class="value">${fmt(weekPts,1)}</div></div>
+      <div class="kpi-card"><div class="label">${monthShort}</div><div class="value">${fmt(monthPts,1)}</div></div>
+      <div class="kpi-card"><div class="label">Season</div><div class="value">${fmt(t.totalPoints,1)}</div></div>
     </div>
 
     <div class="progress-strip">
@@ -325,7 +363,7 @@ function renderTech(name){
   const color=TECH_COLORS[name]||'#2563eb';
   const wl=weeks.map(w=>w.weekLabel);
   charts.push(new Chart(document.getElementById('p1'),{type:'line',data:{labels:wl,datasets:[{data:weeks.map(w=>w.pointsDay),borderColor:color,backgroundColor:color+'18',fill:true,tension:0.3,pointRadius:5,borderWidth:2.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
-  charts.push(new Chart(document.getElementById('p2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),borderColor:color,backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
+  charts.push(new Chart(document.getElementById('p2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
   charts.push(new Chart(document.getElementById('p3'),{type:'bar',data:{labels:wl,datasets:[
     {label:'S',data:weeks.map(w=>w.S||0),backgroundColor:'#2563eb',stack:'u'},
     {label:'W',data:weeks.map(w=>w.W||0),backgroundColor:'#059669',stack:'u'},
