@@ -305,10 +305,6 @@ td.name { font-weight: 500; }
 
 /* ========== Mobile ========== */
 @media (max-width: 768px) {
-  /*
-    Fixed nav is more reliable than sticky on iOS Safari.
-    Body padding-top reserves space so content is never hidden under the bar.
-  */
   .nav {
     position: fixed;
     top: 0;
@@ -330,18 +326,20 @@ td.name { font-weight: 500; }
   .nav-brand {
     font-size: 14px;
   }
-  /* Show ALL tech links — wrap, no horizontal scroll */
   .nav-links {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: 6px;
-    overflow: visible;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible !important;
   }
   .nav-links a {
     padding: 7px 11px;
     font-size: 13px;
     background: var(--border-soft);
+    flex: 0 0 auto;
   }
   .nav-links a.active {
     background: var(--primary-soft);
