@@ -1,6 +1,6 @@
 /* Breathe-Easy Dashboard */
 const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3aed',Tiago:'#0891b2'};
-let DATA=null, charts=[], RANK_MODE='day', TEAM_SCALE='week'; // week | month | quarter
+let DATA=null, charts=[], RANK_MODE='day', TEAM_SCALE='week';
 
 function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
 function fmt(n,d=0){if(n==null||isNaN(n))return'\u2014';return Number(n).toLocaleString('en-HK',{maximumFractionDigits:d,minimumFractionDigits:d});}
@@ -43,17 +43,9 @@ function gapToNext(sorted, i){
   if(i===0) return null;
   return sorted[i-1].pointsDay - sorted[i].pointsDay;
 }
-function weekMonth(weekStr){
-  return (weekStr||'').slice(0,7);
-}
-function latestWeekKey(){
-  const w=DATA.weeks||[];
-  return w.length?w[w.length-1]:null;
-}
-function currentMonthKey(){
-  const lw=latestWeekKey();
-  return lw?weekMonth(lw):null;
-}
+function weekMonth(weekStr){ return (weekStr||'').slice(0,7); }
+function latestWeekKey(){ const w=DATA.weeks||[]; return w.length?w[w.length-1]:null; }
+function currentMonthKey(){ const lw=latestWeekKey(); return lw?weekMonth(lw):null; }
 function techWeekPoints(name, weekKey){
   const r=(DATA.technicians[name].weeks||[]).find(x=>x.week===weekKey);
   return r? (r.points||0) : 0;
@@ -78,10 +70,7 @@ function weekQuarter(weekStr){
   const q=Math.ceil(m/3);
   return y+'-Q'+q;
 }
-function currentQuarterKey(){
-  const lw=latestWeekKey();
-  return lw?weekQuarter(lw):null;
-}
+function currentQuarterKey(){ const lw=latestWeekKey(); return lw?weekQuarter(lw):null; }
 function techQuarterPoints(name, quarterKey){
   let sum=0;
   for(const r of (DATA.technicians[name].weeks||[])){
@@ -119,9 +108,7 @@ function rankBy(mode){
   const key=rankMetricKey(mode);
   return DATA.ranking.map(enrichTech).sort((a,b)=>(b[key]||0)-(a[key]||0));
 }
-function rankByPtsDay(){
-  return rankBy('day');
-}
+function rankByPtsDay(){ return rankBy('day'); }
 function gapOnMetric(sorted, i, mode){
   if(i===0) return null;
   const key=rankMetricKey(mode);
@@ -167,68 +154,71 @@ function teamScaleStats(scale){
   const monthKey=currentMonthKey();
   const quarterKey=currentQuarterKey();
   const latest=tw.length-1;
-
   if(scale==='week'){
     const cur=tw[latest]||{points:0,pointsDay:0,units:0,days:0};
     const prev=latest>0?tw[latest-1]:null;
     const returns=teamReturnsForWeek(weeks[latest]);
     return {
       label: labels[latest]||'This week',
-      points: cur.points,
-      pointsDay: cur.pointsDay,
-      units: cur.units,
-      days: cur.days,
-      returns,
-      prevPoints: prev?prev.points:null,
-      prevPointsDay: prev?prev.pointsDay:null,
+      points: cur.points, pointsDay: cur.pointsDay, units: cur.units, days: cur.days, returns,
+      prevPoints: prev?prev.points:null, prevPointsDay: prev?prev.pointsDay:null,
       prevLabel: latest>0?(labels[latest-1]||'Prior'):null
     };
   }
   if(scale==='month'){
     let points=0,units=0,days=0,returns=0;
-    tw.forEach((row,i)=>{
-      if(weekMonth(weeks[i])===monthKey){
-        points+=row.points; units+=row.units; days+=row.days;
-        returns+=teamReturnsForWeek(weeks[i]);
-      }
-    });
-    return {
-      label: monthLabel(monthKey),
-      points, pointsDay: days?points/days:0, units, days, returns,
-      prevPoints: null, prevPointsDay: null, prevLabel: null
-    };
+    tw.forEach((row,i)=>{ if(weekMonth(weeks[i])===monthKey){ points+=row.points; units+=row.units; days+=row.days; returns+=teamReturnsForWeek(weeks[i]); } });
+    return { label: monthLabel(monthKey), points, pointsDay: days?points/days:0, units, days, returns, prevPoints:null, prevPointsDay:null, prevLabel:null };
   }
   let points=0,units=0,days=0,returns=0;
-  tw.forEach((row,i)=>{
-    if(weekQuarter(weeks[i])===quarterKey){
-      points+=row.points; units+=row.units; days+=row.days;
-      returns+=teamReturnsForWeek(weeks[i]);
-    }
-  });
-  return {
-    label: quarterLabel(quarterKey),
-    points, pointsDay: days?points/days:0, units, days, returns,
-    prevPoints: null, prevPointsDay: null, prevLabel: null
-  };
+  tw.forEach((row,i)=>{ if(weekQuarter(weeks[i])===quarterKey){ points+=row.points; units+=row.units; days+=row.days; returns+=teamReturnsForWeek(weeks[i]); } });
+  return { label: quarterLabel(quarterKey), points, pointsDay: days?points/days:0, units, days, returns, prevPoints:null, prevPointsDay:null, prevLabel:null };
 }
 function teamStory(stats, scale, tw){
-  const bits=[];
-  bits.push(stats.label+': <strong>'+fmt(stats.points,1)+' pts</strong>');
-  bits.push(fmt(stats.pointsDay,2)+' pts/day');
+  let deltaClass='flat', deltaText='';
   if(scale==='week' && stats.prevPoints!=null){
     const d=stats.points-stats.prevPoints;
-    if(d>0.5) bits.push('up vs last week');
-    else if(d<-0.5) bits.push('down vs last week');
-    else bits.push('flat vs last week');
+    if(d>0.5){ deltaClass='up'; deltaText='Up vs last week'; }
+    else if(d<-0.5){ deltaClass='down'; deltaText='Down vs last week'; }
+    else { deltaClass='flat'; deltaText='Flat vs last week'; }
   }
-  if(tw && tw.length){
+  let isBest=false;
+  if(scale==='week' && tw && tw.length){
     let best=tw[0].points, bi=0;
     tw.forEach((r,i)=>{ if(r.points>best){ best=r.points; bi=i; } });
-    if(scale==='week' && bi===tw.length-1) bits.push('best points week so far');
+    isBest = bi===tw.length-1;
   }
-  if(stats.returns===0) bits.push('no returns');
-  else bits.push(fmt(stats.returns)+' returns');
-  return bits.join(' \u00b7 ');
+  const chips=[];
+  if(deltaText) chips.push(`<span class="story-chip ${deltaClass}">${deltaText}</span>`);
+  if(isBest) chips.push(`<span class="story-chip best">Best week so far</span>`);
+  if(stats.returns===0) chips.push(`<span class="story-chip clean">No returns</span>`);
+  else chips.push(`<span class="story-chip mild">${fmt(stats.returns)} returns</span>`);
+
+  return `
+    <div class="story-top">
+      <div class="story-period">${stats.label}</div>
+      ${chips.length?`<div class="story-chips">${chips.join('')}</div>`:''}
+    </div>
+    <div class="story-main">
+      <div class="story-hero">
+        <div class="story-hero-value">${fmt(stats.points,1)}</div>
+        <div class="story-hero-label">Team points</div>
+      </div>
+      <div class="story-stats">
+        <div class="story-stat">
+          <div class="story-stat-value">${fmt(stats.pointsDay,2)}</div>
+          <div class="story-stat-label">Pts / day</div>
+        </div>
+        <div class="story-stat">
+          <div class="story-stat-value">${fmt(stats.days)}</div>
+          <div class="story-stat-label">Workdays</div>
+        </div>
+        <div class="story-stat">
+          <div class="story-stat-value">${fmt(stats.units)}</div>
+          <div class="story-stat-label">Units</div>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderCompetition(){
@@ -238,24 +228,18 @@ function renderCompetition(){
   const labels=DATA.weekLabels;
   const weeks=DATA.weeks;
   const names=Object.keys(DATA.technicians);
-  const latestWk=latestWeekKey();
-  const monthKey=currentMonthKey();
-  const monthShort=monthLabel(monthKey);
+  const monthShort=monthLabel(currentMonthKey());
   const sorted=rankBy(mode);
   const metricKey=rankMetricKey(mode);
-  const quarterKey=currentQuarterKey();
-  const quarterShort=quarterLabel(quarterKey);
+  const quarterShort=quarterLabel(currentQuarterKey());
   const metricLabel=rankMetricLabel(mode, monthShort, quarterShort);
-
-  const modeBtn = (id, label) =>
-    `<button type="button" class="rank-mode-btn ${mode===id?'active':''}" data-mode="${id}">${label}</button>`;
+  const modeBtn = (id, label) => `<button type="button" class="rank-mode-btn ${mode===id?'active':''}" data-mode="${id}">${label}</button>`;
 
   document.getElementById('app').innerHTML=`
     <div class="page-header">
       <h1>Competition</h1>
       <p>Pick the timescale you want to compete on \u00b7 Updated ${DATA.generated}</p>
     </div>
-
     <div class="rank-modes" id="rank-modes">
       ${modeBtn('day', 'Pts / Day')}
       ${modeBtn('week', 'This Week')}
@@ -264,11 +248,10 @@ function renderCompetition(){
     </div>
     <p class="rank-mode-hint">
       ${mode==='day' ? 'Pace \u2014 fair when people work different numbers of days.' : ''}
-      ${mode==='week' ? 'Output this week \u2014 more days worked counts. Full points for the week.' : ''}
-      ${mode==='month' ? 'Output this month \u2014 more days worked counts. Full points for '+monthShort+'.' : ''}
-      ${mode==='quarter' ? 'Output this quarter \u2014 more days worked counts. Full points for '+quarterShort+'.' : ''}
+      ${mode==='week' ? 'Output this week \u2014 more days worked counts.' : ''}
+      ${mode==='month' ? 'Output this month \u2014 more days worked counts.' : ''}
+      ${mode==='quarter' ? 'Output this quarter \u2014 more days worked counts.' : ''}
     </p>
-
     <div class="section">
       <div class="section-title">Leaderboard \u00b7 ${metricLabel}</div>
       <div class="table-wrap"><table>
@@ -284,14 +267,11 @@ function renderCompetition(){
         </tr></thead>
         <tbody>${sorted.map((t,i)=>{
           const gap=gapOnMetric(sorted,i,mode);
-          const gapHtml=i===0
-            ? `<span style="color:var(--green);font-weight:600">Lead</span>`
-            : `<span style="color:var(--text-muted)">${fmtMetric(mode, gap)} behind</span>`;
-          const primary=t[metricKey];
+          const gapHtml=i===0 ? `<span style="color:var(--green);font-weight:600">Lead</span>` : `<span style="color:var(--text-muted)">${fmtMetric(mode, gap)} behind</span>`;
           return `<tr>
             <td>${i+1}</td>
             <td class="name"><a href="#/tech/${t.name}" style="color:inherit;text-decoration:none">${t.name}</a></td>
-            <td class="num"><strong>${fmtMetric(mode, primary)}</strong></td>
+            <td class="num"><strong>${fmtMetric(mode, t[metricKey])}</strong></td>
             <td class="num ${mode==='day'?'':'hide-sm'}">${fmt(t.pointsDay,2)}</td>
             <td class="num ${mode==='week'?'':'hide-sm'}">${fmt(t.weekPts,1)}</td>
             <td class="num ${mode==='month'?'':'hide-sm'}">${fmt(t.monthPts,1)}</td>
@@ -301,9 +281,8 @@ function renderCompetition(){
           </tr>`;
         }).join('')}</tbody>
       </table></div>
-      <p class="note">All four timescales are valid ways to compete. Switch the tabs above to re-rank.</p>
+      <p class="note">All four timescales are valid ways to compete.</p>
     </div>
-
     <div class="section">
       <div class="section-title">Head-to-head \u00b7 ${metricLabel}</div>
       <div class="chart-grid">
@@ -312,14 +291,13 @@ function renderCompetition(){
         <div class="chart-card full"><h3>Points by week</h3><div class="chart-wrap tall"><canvas id="c3"></canvas></div></div>
       </div>
     </div>
-
     <div class="section">
       <div class="section-title">Points system</div>
       <div class="points-ref"><table>
         <thead><tr><th>Unit type</th><th class="num">Points</th><th>Note</th></tr></thead>
         <tbody>${DATA.pointsTable.map(p=>`<tr><td class="name">${p.type}</td><td class="num"><strong>${fmt(p.points,2)}</strong></td><td style="color:var(--text-muted)">${p.note}</td></tr>`).join('')}</tbody>
       </table>
-      <p class="note">Influencer (free) units receive the same points as paid units of the same type.</p></div>
+      <p class="note">Influencer units receive the same points as paid units of the same type.</p></div>
     </div>`;
 
   document.getElementById('rank-modes').addEventListener('click', (e)=>{
@@ -329,28 +307,10 @@ function renderCompetition(){
     renderCompetition();
   });
 
-  charts.push(new Chart(document.getElementById('c1'),{
-    type:'bar',
-    data:{labels:sorted.map(t=>t.name),datasets:[{data:sorted.map(t=>t[metricKey]),backgroundColor:sorted.map(t=>TECH_COLORS[t.name]),borderRadius:6,barThickness:22}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:12}}}}}
-  }));
-
+  charts.push(new Chart(document.getElementById('c1'),{ type:'bar', data:{labels:sorted.map(t=>t.name),datasets:[{data:sorted.map(t=>t[metricKey]),backgroundColor:sorted.map(t=>TECH_COLORS[t.name]),borderRadius:6,barThickness:22}]}, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}} }));
   const byQ=DATA.ranking.map(enrichTech).sort((a,b)=>b.quarterPts-a.quarterPts);
-  charts.push(new Chart(document.getElementById('c2'),{
-    type:'doughnut',
-    data:{labels:byQ.map(t=>t.name),datasets:[{data:byQ.map(t=>t.quarterPts),backgroundColor:byQ.map(t=>TECH_COLORS[t.name]),borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw,1)} pts`}}},cutout:'62%'}
-  }));
-
-  charts.push(new Chart(document.getElementById('c3'),{
-    type:'bar',
-    data:{labels,datasets:names.map(n=>({
-      label:n,
-      data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}),
-      backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p'
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}
-  }));
+  charts.push(new Chart(document.getElementById('c2'),{ type:'doughnut', data:{labels:byQ.map(t=>t.name),datasets:[{data:byQ.map(t=>t.quarterPts),backgroundColor:byQ.map(t=>TECH_COLORS[t.name]),borderWidth:0}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},cutout:'62%'} }));
+  charts.push(new Chart(document.getElementById('c3'),{ type:'bar', data:{labels,datasets:names.map(n=>({ label:n, data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}), backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p' }))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}} }));
 }
 
 function renderTeam(){
@@ -367,32 +327,20 @@ function renderTeam(){
   const unitChips=unitOrder.filter(u=>(unitTotals[u]||0)>0);
   const stats=teamScaleStats(scale);
   const story=teamStory(stats, scale, tw);
-
-  const scaleBtn = (id, label) =>
-    `<button type="button" class="rank-mode-btn ${scale===id?'active':''}" data-scale="${id}">${label}</button>`;
+  const scaleBtn = (id, label) => `<button type="button" class="rank-mode-btn ${scale===id?'active':''}" data-scale="${id}">${label}</button>`;
 
   document.getElementById('app').innerHTML=`
     <div class="page-header">
       <h1>Full Team</h1>
       <p>Collective board \u00b7 Rankings live under Competition \u00b7 Updated ${DATA.generated}</p>
     </div>
-
     <div class="team-story">${story}</div>
-
     <div class="rank-modes" id="team-scales">
       ${scaleBtn('week', 'This Week')}
       ${scaleBtn('month', monthLabel(currentMonthKey()))}
       ${scaleBtn('quarter', quarterLabel(currentQuarterKey()))}
     </div>
     <p class="rank-mode-hint">Output and pace for the whole crew. No rankings on this page.</p>
-
-    <div class="kpi-row">
-      <div class="kpi-card"><div class="label">Team Points</div><div class="value">${fmt(stats.points,1)}</div></div>
-      <div class="kpi-card"><div class="label">Pts / Day</div><div class="value">${fmt(stats.pointsDay,2)}</div></div>
-      <div class="kpi-card"><div class="label">Workdays</div><div class="value">${fmt(stats.days)}</div></div>
-      <div class="kpi-card"><div class="label">Returns</div><div class="value">${fmt(stats.returns)}</div></div>
-    </div>
-
     <div class="section">
       <div class="section-title">Charts</div>
       <div class="chart-grid">
@@ -402,28 +350,18 @@ function renderTeam(){
         <div class="chart-card full"><h3>Team points by week</h3><div class="chart-wrap"><canvas id="t3"></canvas></div></div>
       </div>
     </div>
-
     <div class="section">
       <div class="section-title">Week by week</div>
       <div class="table-wrap"><table>
-        <thead><tr>
-          <th>Week</th>
-          <th class="num">Points</th>
-          <th class="num">Pts/Day</th>
-          <th class="num">Units</th>
-          <th class="num">Workdays</th>
-          <th class="num">Returns</th>
-        </tr></thead>
-        <tbody>${tw.map((w,i)=>{
-          const ret=teamReturnsForWeek(weeks[i]);
-          return `<tr>
+        <thead><tr><th>Week</th><th class="num">Points</th><th class="num">Pts/Day</th><th class="num">Units</th><th class="num">Workdays</th><th class="num">Returns</th></tr></thead>
+        <tbody>${tw.map((w,i)=>`<tr>
           <td>${labels[i]||w.week}</td>
           <td class="num"><strong>${fmt(w.points,1)}</strong></td>
           <td class="num">${fmt(w.pointsDay,2)}</td>
           <td class="num">${fmt(w.units)}</td>
           <td class="num">${fmt(w.days)}</td>
-          <td class="num">${fmt(ret)}</td>
-        </tr>`;}).join('')}
+          <td class="num">${fmt(teamReturnsForWeek(weeks[i]))}</td>
+        </tr>`).join('')}
         <tr style="background:#f8fafc;font-weight:600">
           <td>All weeks</td>
           <td class="num">${fmt(team.totalPoints,1)}</td>
@@ -435,7 +373,6 @@ function renderTeam(){
         </tbody>
       </table></div>
     </div>
-
     <div class="section">
       <div class="section-title">What the crew delivered</div>
       <div class="unit-chips">${unitChips.map(u=>`<div class="unit-chip"><div class="ut">${u}</div><div class="uv">${fmt(unitTotals[u])}</div></div>`).join('')}</div>
@@ -450,51 +387,11 @@ function renderTeam(){
 
   const latest=tw.length-1;
   const prev=latest>0?latest-1:-1;
-  charts.push(new Chart(document.getElementById('t0'),{
-    type:'bar',
-    data:{
-      labels: prev>=0?[labels[prev], labels[latest]]: [labels[latest]],
-      datasets:[{
-        data: prev>=0?[tw[prev].points, tw[latest].points]:[tw[latest].points],
-        backgroundColor: prev>=0?['#94a3b8','#2563eb']:['#2563eb'],
-        borderRadius:8,
-        barThickness:40
-      }]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
-  }));
-
+  charts.push(new Chart(document.getElementById('t0'),{ type:'bar', data:{ labels: prev>=0?[labels[prev], labels[latest]]:[labels[latest]], datasets:[{ data: prev>=0?[tw[prev].points, tw[latest].points]:[tw[latest].points], backgroundColor: prev>=0?['#94a3b8','#2563eb']:['#2563eb'], borderRadius:8, barThickness:40 }] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
   const avgPD = team.avgPointsDay;
-  charts.push(new Chart(document.getElementById('t2'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Pts/day', data:tw.map(w=>w.pointsDay), borderColor:'#2563eb', backgroundColor:'#2563eb22', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5},
-      {label:'Avg', data:labels.map(()=>avgPD), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
-  }));
-
-  charts.push(new Chart(document.getElementById('t1'),{
-    type:'bar',
-    data:{labels,datasets:names.map(n=>({
-      label:n,
-      data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}),
-      backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p'
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}
-  }));
-
-  charts.push(new Chart(document.getElementById('t3'),{
-    type:'bar',
-    data:{labels,datasets:[{
-      label:'Team points',
-      data:tw.map(w=>w.points),
-      backgroundColor:'#059669',
-      borderRadius:6,
-      barThickness:28
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
-  }));
+  charts.push(new Chart(document.getElementById('t2'),{ type:'line', data:{labels,datasets:[ {label:'Pts/day', data:tw.map(w=>w.pointsDay), borderColor:'#2563eb', backgroundColor:'#2563eb22', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5}, {label:'Avg', data:labels.map(()=>avgPD), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false} ]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
+  charts.push(new Chart(document.getElementById('t1'),{ type:'bar', data:{labels,datasets:names.map(n=>({ label:n, data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}), backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p' }))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}} }));
+  charts.push(new Chart(document.getElementById('t3'),{ type:'bar', data:{labels,datasets:[{ label:'Team points', data:tw.map(w=>w.points), backgroundColor:'#059669', borderRadius:6, barThickness:28 }]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
 }
 
 function renderTech(name){
@@ -510,29 +407,22 @@ function renderTech(name){
   const vs=team.avgPointsDay?(t.pointsDay/team.avgPointsDay-1):0;
   const weeks=t.weeks||[];
   const unitOrder=['S','W','B','C','UC','SwG','TV','OU'];
-  const latestWk=latestWeekKey();
-  const monthKey=currentMonthKey();
-  const monthShort=monthLabel(monthKey);
-  const weekPts=techWeekPoints(name, latestWk);
-  const monthPts=techMonthPoints(name, monthKey);
+  const weekPts=techWeekPoints(name, latestWeekKey());
+  const monthPts=techMonthPoints(name, currentMonthKey());
   const quarterKey=currentQuarterKey();
   const quarterShort=quarterLabel(quarterKey);
   const quarterPts=techQuarterPoints(name, quarterKey);
-
-  const gapLine = rank===1
-    ? `<div class="progress-item">Rank: <strong>#1 efficiency</strong></div>`
-    : `<div class="progress-item">Rank: <strong>#${rank}</strong> \u00b7 ${fmt(gap,2)} pts/day behind</div>`;
+  const monthShort=monthLabel(currentMonthKey());
+  const gapLine = rank===1 ? `<div class="progress-item">Rank: <strong>#1 efficiency</strong></div>` : `<div class="progress-item">Rank: <strong>#${rank}</strong> \u00b7 ${fmt(gap,2)} pts/day behind</div>`;
 
   document.getElementById('app').innerHTML=`
     <div class="page-header"><h1>${t.name}</h1><p>Personal performance profile</p></div>
-
     <div class="kpi-row">
       <div class="kpi-card"><div class="label">Pts / Day</div><div class="value">${fmt(t.pointsDay,2)}</div></div>
       <div class="kpi-card"><div class="label">This Week</div><div class="value">${fmt(weekPts,1)}</div></div>
       <div class="kpi-card"><div class="label">${monthShort}</div><div class="value">${fmt(monthPts,1)}</div></div>
       <div class="kpi-card"><div class="label">${quarterShort}</div><div class="value">${fmt(quarterPts,1)}</div></div>
     </div>
-
     <div class="progress-strip">
       ${badge(t.trend)}
       ${gapLine}
@@ -541,11 +431,9 @@ function renderTech(name){
       <div class="progress-item">Best week: <strong>${fmt(t.bestPointsDay,2)}</strong> pts/day</div>
       <div class="progress-item">Returns: <strong>${fmt(t.totalReturns)}</strong></div>
     </div>
-
     <div class="section"><div class="section-title">Unit mix</div>
       <div class="unit-chips">${unitOrder.filter(u=>(t.unitTotals||{})[u]>0).map(u=>`<div class="unit-chip"><div class="ut">${u}</div><div class="uv">${fmt(t.unitTotals[u])}</div></div>`).join('')}</div>
     </div>
-
     <div class="section"><div class="section-title">Week by week</div>
       <p class="scroll-hint">Swipe table sideways for unit breakdown</p>
       <div class="table-wrap"><table class="wide">
@@ -562,9 +450,7 @@ function renderTech(name){
           <td class="num">${fmt(t.totalDays)}</td><td class="num">${fmt(t.totalInflPoints,1)}</td><td class="num">${fmt(t.totalReturns)}</td></tr>
         </tbody>
       </table></div>
-      <p class="note">Zero weeks highlighted. Influencer units count full points.</p>
     </div>
-
     <div class="section"><div class="section-title">Your charts</div>
       <div class="chart-grid">
         <div class="chart-card"><h3>Points / day</h3><div class="chart-wrap"><canvas id="p1"></canvas></div></div>
