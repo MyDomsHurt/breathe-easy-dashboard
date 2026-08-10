@@ -308,13 +308,44 @@ td.name { font-weight: 500; }
   margin: -8px 0 10px;
 }
 
+.rank-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.rank-mode-btn {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.rank-mode-btn:hover {
+  color: var(--text);
+  border-color: #c5cdd8;
+}
+.rank-mode-btn.active {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: #bfdbfe;
+  font-weight: 600;
+}
+.rank-mode-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  min-height: 1.4em;
+}
+
 /* ========== Mobile ========== */
 @media (max-width: 768px) {
-  /*
-    Fixed nav + in-flow spacer (not body padding):
-    bar stays visible on iOS; spacer preserves real document top.
-    Links stay one compact horizontal row.
-  */
   .nav {
     position: fixed;
     top: 0;
@@ -364,6 +395,14 @@ td.name { font-weight: 500; }
     color: var(--primary);
   }
 
+  .rank-mode-btn {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+  .rank-mode-hint {
+    font-size: 12px;
+    margin-bottom: 18px;
+  }
   .container {
     padding: 16px 14px 48px;
   }
