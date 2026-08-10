@@ -1,6 +1,6 @@
 /* Breathe-Easy Dashboard */
 const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3aed',Tiago:'#0891b2'};
-let DATA=null, charts=[], RANK_MODE='day'; // day | week | month | season
+let DATA=null, charts=[], RANK_MODE='day'; // day | week | month | quarter
 
 function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
 function fmt(n,d=0){if(n==null||isNaN(n))return'\u2014';return Number(n).toLocaleString('en-HK',{maximumFractionDigits:d,minimumFractionDigits:d});}
@@ -71,9 +71,33 @@ function monthLabel(monthKey){
   const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return names[parseInt(m,10)-1]+' '+y;
 }
+function weekQuarter(weekStr){
+  if(!weekStr) return null;
+  const y=weekStr.slice(0,4);
+  const m=parseInt(weekStr.slice(5,7),10);
+  const q=Math.ceil(m/3);
+  return y+'-Q'+q;
+}
+function currentQuarterKey(){
+  const lw=latestWeekKey();
+  return lw?weekQuarter(lw):null;
+}
+function techQuarterPoints(name, quarterKey){
+  let sum=0;
+  for(const r of (DATA.technicians[name].weeks||[])){
+    if(weekQuarter(r.week)===quarterKey) sum+=(r.points||0);
+  }
+  return sum;
+}
+function quarterLabel(quarterKey){
+  if(!quarterKey) return 'Quarter';
+  const parts=quarterKey.split('-Q');
+  return 'Q'+parts[1]+' '+parts[0];
+}
 function enrichTech(t){
   const latestWk=latestWeekKey();
   const monthKey=currentMonthKey();
+  const quarterKey=currentQuarterKey();
   let monthDays=0;
   for(const r of (DATA.technicians[t.name].weeks||[])){
     if(weekMonth(r.week)===monthKey) monthDays+=(r.workday||0);
@@ -81,14 +105,15 @@ function enrichTech(t){
   return Object.assign({}, t, {
     weekPts: techWeekPoints(t.name, latestWk),
     monthPts: techMonthPoints(t.name, monthKey),
+    quarterPts: techQuarterPoints(t.name, quarterKey),
     monthDays: monthDays
   });
 }
 function rankMetricKey(mode){
-  return ({day:'pointsDay', week:'weekPts', month:'monthPts', season:'totalPoints'})[mode]||'pointsDay';
+  return ({day:'pointsDay', week:'weekPts', month:'monthPts', quarter:'quarterPts'})[mode]||'pointsDay';
 }
-function rankMetricLabel(mode, monthShort){
-  return ({day:'Pts/Day', week:'This Week', month:(monthShort||'Month'), season:'Season'})[mode]||'Pts/Day';
+function rankMetricLabel(mode, monthShort, quarterShort){
+  return ({day:'Pts/Day', week:'This Week', month:(monthShort||'Month'), quarter:(quarterShort||'Quarter')})[mode]||'Pts/Day';
 }
 function rankBy(mode){
   const key=rankMetricKey(mode);
@@ -140,7 +165,9 @@ function renderCompetition(){
   const monthShort=monthLabel(monthKey);
   const sorted=rankBy(mode);
   const metricKey=rankMetricKey(mode);
-  const metricLabel=rankMetricLabel(mode, monthShort);
+  const quarterKey=currentQuarterKey();
+  const quarterShort=quarterLabel(quarterKey);
+  const metricLabel=rankMetricLabel(mode, monthShort, quarterShort);
 
   const modeBtn = (id, label) =>
     `<button type="button" class="rank-mode-btn ${mode===id?'active':''}" data-mode="${id}">${label}</button>`;
@@ -155,13 +182,13 @@ function renderCompetition(){
       ${modeBtn('day', 'Pts / Day')}
       ${modeBtn('week', 'This Week')}
       ${modeBtn('month', monthShort)}
-      ${modeBtn('season', 'Season')}
+      ${modeBtn('quarter', quarterShort)}
     </div>
     <p class="rank-mode-hint">
       ${mode==='day' ? 'Pace \u2014 fair when people work different numbers of days.' : ''}
       ${mode==='week' ? 'Output this week \u2014 more days worked counts. Full points for the week.' : ''}
       ${mode==='month' ? 'Output this month \u2014 more days worked counts. Full points for '+monthShort+'.' : ''}
-      ${mode==='season' ? 'Full period total points \u2014 cumulative output.' : ''}
+      ${mode==='quarter' ? 'Output this quarter \u2014 more days worked counts. Full points for '+quarterShort+'.' : ''}
     </p>
 
     <div class="section">
@@ -173,7 +200,7 @@ function renderCompetition(){
           <th class="num ${mode==='day'?'':'hide-sm'}">Pts/Day</th>
           <th class="num ${mode==='week'?'':'hide-sm'}">This Week</th>
           <th class="num ${mode==='month'?'':'hide-sm'}">${monthShort}</th>
-          <th class="num ${mode==='season'?'':'hide-sm'}">Season</th>
+          <th class="num ${mode==='quarter'?'':'hide-sm'}">${quarterShort}</th>
           <th class="num hide-sm">Gap</th>
           <th>Trend</th>
         </tr></thead>
@@ -190,7 +217,7 @@ function renderCompetition(){
             <td class="num ${mode==='day'?'':'hide-sm'}">${fmt(t.pointsDay,2)}</td>
             <td class="num ${mode==='week'?'':'hide-sm'}">${fmt(t.weekPts,1)}</td>
             <td class="num ${mode==='month'?'':'hide-sm'}">${fmt(t.monthPts,1)}</td>
-            <td class="num ${mode==='season'?'':'hide-sm'}">${fmt(t.totalPoints,1)}</td>
+            <td class="num ${mode==='quarter'?'':'hide-sm'}">${fmt(t.quarterPts,1)}</td>
             <td class="num hide-sm">${gapHtml}</td>
             <td>${badge(t.trend)}</td>
           </tr>`;
@@ -203,7 +230,7 @@ function renderCompetition(){
       <div class="section-title">Head-to-head \u00b7 ${metricLabel}</div>
       <div class="chart-grid">
         <div class="chart-card"><h3>${metricLabel} ranking</h3><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
-        <div class="chart-card"><h3>Season points share</h3><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
+        <div class="chart-card"><h3>${quarterShort} share</h3><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
         <div class="chart-card full"><h3>Points by week</h3><div class="chart-wrap tall"><canvas id="c3"></canvas></div></div>
       </div>
     </div>
@@ -230,10 +257,10 @@ function renderCompetition(){
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:12}}}}}
   }));
 
-  const byPoints=[...DATA.ranking].sort((a,b)=>b.totalPoints-a.totalPoints);
+  const byQ=DATA.ranking.map(enrichTech).sort((a,b)=>b.quarterPts-a.quarterPts);
   charts.push(new Chart(document.getElementById('c2'),{
     type:'doughnut',
-    data:{labels:byPoints.map(t=>t.name),datasets:[{data:byPoints.map(t=>t.totalPoints),backgroundColor:byPoints.map(t=>TECH_COLORS[t.name]),borderWidth:0}]},
+    data:{labels:byQ.map(t=>t.name),datasets:[{data:byQ.map(t=>t.quarterPts),backgroundColor:byQ.map(t=>TECH_COLORS[t.name]),borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw,1)} pts`}}},cutout:'62%'}
   }));
 
@@ -264,6 +291,9 @@ function renderTeam(){
   const monthShort=monthLabel(monthKey);
   const teamWeekPts=names.reduce((s,n)=>s+techWeekPoints(n,latestWk),0);
   const teamMonthPts=names.reduce((s,n)=>s+techMonthPoints(n,monthKey),0);
+  const quarterKey=currentQuarterKey();
+  const quarterShort=quarterLabel(quarterKey);
+  const teamQuarterPts=names.reduce((s,n)=>s+techQuarterPoints(n,quarterKey),0);
 
   document.getElementById('app').innerHTML=`
     <div class="page-header">
@@ -272,10 +302,10 @@ function renderTeam(){
     </div>
 
     <div class="kpi-row">
-      <div class="kpi-card"><div class="label">Team Points</div><div class="value">${fmt(team.totalPoints,1)}</div></div>
       <div class="kpi-card"><div class="label">Team Pts / Day</div><div class="value">${fmt(team.avgPointsDay,2)}</div></div>
       <div class="kpi-card"><div class="label">This Week</div><div class="value">${fmt(teamWeekPts,1)}</div></div>
       <div class="kpi-card"><div class="label">${monthShort}</div><div class="value">${fmt(teamMonthPts,1)}</div></div>
+      <div class="kpi-card"><div class="label">${quarterShort}</div><div class="value">${fmt(teamQuarterPts,1)}</div></div>
     </div>
 
     <div class="section">
@@ -370,6 +400,9 @@ function renderTech(name){
   const monthShort=monthLabel(monthKey);
   const weekPts=techWeekPoints(name, latestWk);
   const monthPts=techMonthPoints(name, monthKey);
+  const quarterKey=currentQuarterKey();
+  const quarterShort=quarterLabel(quarterKey);
+  const quarterPts=techQuarterPoints(name, quarterKey);
 
   const gapLine = rank===1
     ? `<div class="progress-item">Rank: <strong>#1 efficiency</strong></div>`
@@ -382,7 +415,7 @@ function renderTech(name){
       <div class="kpi-card"><div class="label">Pts / Day</div><div class="value">${fmt(t.pointsDay,2)}</div></div>
       <div class="kpi-card"><div class="label">This Week</div><div class="value">${fmt(weekPts,1)}</div></div>
       <div class="kpi-card"><div class="label">${monthShort}</div><div class="value">${fmt(monthPts,1)}</div></div>
-      <div class="kpi-card"><div class="label">Season</div><div class="value">${fmt(t.totalPoints,1)}</div></div>
+      <div class="kpi-card"><div class="label">${quarterShort}</div><div class="value">${fmt(quarterPts,1)}</div></div>
     </div>
 
     <div class="progress-strip">
