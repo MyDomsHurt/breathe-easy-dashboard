@@ -1,6 +1,6 @@
 /* Breathe-Easy Dashboard */
 const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3aed',Tiago:'#0891b2'};
-let DATA=null, charts=[], RANK_MODE='day'; // day | week | month | quarter
+let DATA=null, charts=[], RANK_MODE='day', TEAM_SCALE='week'; // week | month | quarter
 
 function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
 function fmt(n,d=0){if(n==null||isNaN(n))return'\u2014';return Number(n).toLocaleString('en-HK',{maximumFractionDigits:d,minimumFractionDigits:d});}
@@ -29,7 +29,7 @@ function syncNavSpacer(){
 function setNav(active){
   const links=[
     {href:'#/compete',label:'Competition'},
-    {href:'#/team',label:'Team'},
+    {href:'#/team',label:'Full Team'},
     ...Object.keys(DATA.technicians).map(t=>({href:`#/tech/${t}`,label:t}))
   ];
   document.getElementById('nav-links').innerHTML=links.map(l=>{
@@ -151,6 +151,84 @@ function teamUnitTotals(){
     }
   }
   return totals;
+}
+function teamReturnsForWeek(weekKey){
+  let sum=0;
+  for(const n of Object.keys(DATA.technicians)){
+    const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===weekKey);
+    if(r) sum+=(r.returns||0);
+  }
+  return sum;
+}
+function teamScaleStats(scale){
+  const tw=teamWeekly();
+  const labels=DATA.weekLabels||[];
+  const weeks=DATA.weeks||[];
+  const monthKey=currentMonthKey();
+  const quarterKey=currentQuarterKey();
+  const latest=tw.length-1;
+
+  if(scale==='week'){
+    const cur=tw[latest]||{points:0,pointsDay:0,units:0,days:0};
+    const prev=latest>0?tw[latest-1]:null;
+    const returns=teamReturnsForWeek(weeks[latest]);
+    return {
+      label: labels[latest]||'This week',
+      points: cur.points,
+      pointsDay: cur.pointsDay,
+      units: cur.units,
+      days: cur.days,
+      returns,
+      prevPoints: prev?prev.points:null,
+      prevPointsDay: prev?prev.pointsDay:null,
+      prevLabel: latest>0?(labels[latest-1]||'Prior'):null
+    };
+  }
+  if(scale==='month'){
+    let points=0,units=0,days=0,returns=0;
+    tw.forEach((row,i)=>{
+      if(weekMonth(weeks[i])===monthKey){
+        points+=row.points; units+=row.units; days+=row.days;
+        returns+=teamReturnsForWeek(weeks[i]);
+      }
+    });
+    return {
+      label: monthLabel(monthKey),
+      points, pointsDay: days?points/days:0, units, days, returns,
+      prevPoints: null, prevPointsDay: null, prevLabel: null
+    };
+  }
+  let points=0,units=0,days=0,returns=0;
+  tw.forEach((row,i)=>{
+    if(weekQuarter(weeks[i])===quarterKey){
+      points+=row.points; units+=row.units; days+=row.days;
+      returns+=teamReturnsForWeek(weeks[i]);
+    }
+  });
+  return {
+    label: quarterLabel(quarterKey),
+    points, pointsDay: days?points/days:0, units, days, returns,
+    prevPoints: null, prevPointsDay: null, prevLabel: null
+  };
+}
+function teamStory(stats, scale, tw){
+  const bits=[];
+  bits.push(stats.label+': <strong>'+fmt(stats.points,1)+' pts</strong>');
+  bits.push(fmt(stats.pointsDay,2)+' pts/day');
+  if(scale==='week' && stats.prevPoints!=null){
+    const d=stats.points-stats.prevPoints;
+    if(d>0.5) bits.push('up vs last week');
+    else if(d<-0.5) bits.push('down vs last week');
+    else bits.push('flat vs last week');
+  }
+  if(tw && tw.length){
+    let best=tw[0].points, bi=0;
+    tw.forEach((r,i)=>{ if(r.points>best){ best=r.points; bi=i; } });
+    if(scale==='week' && bi===tw.length-1) bits.push('best points week so far');
+  }
+  if(stats.returns===0) bits.push('no returns');
+  else bits.push(fmt(stats.returns)+' returns');
+  return bits.join(' \u00b7 ');
 }
 
 function renderCompetition(){
@@ -278,6 +356,7 @@ function renderCompetition(){
 function renderTeam(){
   destroyCharts();
   setNav('#/team');
+  const scale = TEAM_SCALE || 'week';
   const team=DATA.team;
   const labels=DATA.weekLabels;
   const weeks=DATA.weeks;
@@ -286,30 +365,46 @@ function renderTeam(){
   const unitTotals=teamUnitTotals();
   const unitOrder=['S','W','B','C','UC','SwG','TV','OU'];
   const unitChips=unitOrder.filter(u=>(unitTotals[u]||0)>0);
-  const latestWk=latestWeekKey();
-  const monthKey=currentMonthKey();
-  const monthShort=monthLabel(monthKey);
-  const teamWeekPts=names.reduce((s,n)=>s+techWeekPoints(n,latestWk),0);
-  const teamMonthPts=names.reduce((s,n)=>s+techMonthPoints(n,monthKey),0);
-  const quarterKey=currentQuarterKey();
-  const quarterShort=quarterLabel(quarterKey);
-  const teamQuarterPts=names.reduce((s,n)=>s+techQuarterPoints(n,quarterKey),0);
+  const stats=teamScaleStats(scale);
+  const story=teamStory(stats, scale, tw);
+
+  const scaleBtn = (id, label) =>
+    `<button type="button" class="rank-mode-btn ${scale===id?'active':''}" data-scale="${id}">${label}</button>`;
 
   document.getElementById('app').innerHTML=`
     <div class="page-header">
-      <h1>Team Effort</h1>
-      <p>Collective output \u00b7 One crew \u00b7 Updated ${DATA.generated}</p>
+      <h1>Full Team</h1>
+      <p>Collective board \u00b7 Rankings live under Competition \u00b7 Updated ${DATA.generated}</p>
     </div>
 
+    <div class="team-story">${story}</div>
+
+    <div class="rank-modes" id="team-scales">
+      ${scaleBtn('week', 'This Week')}
+      ${scaleBtn('month', monthLabel(currentMonthKey()))}
+      ${scaleBtn('quarter', quarterLabel(currentQuarterKey()))}
+    </div>
+    <p class="rank-mode-hint">Output and pace for the whole crew. No rankings on this page.</p>
+
     <div class="kpi-row">
-      <div class="kpi-card"><div class="label">Team Pts / Day</div><div class="value">${fmt(team.avgPointsDay,2)}</div></div>
-      <div class="kpi-card"><div class="label">This Week</div><div class="value">${fmt(teamWeekPts,1)}</div></div>
-      <div class="kpi-card"><div class="label">${monthShort}</div><div class="value">${fmt(teamMonthPts,1)}</div></div>
-      <div class="kpi-card"><div class="label">${quarterShort}</div><div class="value">${fmt(teamQuarterPts,1)}</div></div>
+      <div class="kpi-card"><div class="label">Team Points</div><div class="value">${fmt(stats.points,1)}</div></div>
+      <div class="kpi-card"><div class="label">Pts / Day</div><div class="value">${fmt(stats.pointsDay,2)}</div></div>
+      <div class="kpi-card"><div class="label">Workdays</div><div class="value">${fmt(stats.days)}</div></div>
+      <div class="kpi-card"><div class="label">Returns</div><div class="value">${fmt(stats.returns)}</div></div>
     </div>
 
     <div class="section">
-      <div class="section-title">Week by week (team)</div>
+      <div class="section-title">Charts</div>
+      <div class="chart-grid">
+        <div class="chart-card"><h3>This week vs last week</h3><div class="chart-wrap"><canvas id="t0"></canvas></div></div>
+        <div class="chart-card"><h3>Crew pace (pts/day)</h3><div class="chart-wrap"><canvas id="t2"></canvas></div></div>
+        <div class="chart-card full"><h3>What we put up each week</h3><div class="chart-wrap tall"><canvas id="t1"></canvas></div></div>
+        <div class="chart-card full"><h3>Team points by week</h3><div class="chart-wrap"><canvas id="t3"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Week by week</div>
       <div class="table-wrap"><table>
         <thead><tr>
           <th>Week</th>
@@ -317,39 +412,67 @@ function renderTeam(){
           <th class="num">Pts/Day</th>
           <th class="num">Units</th>
           <th class="num">Workdays</th>
+          <th class="num">Returns</th>
         </tr></thead>
-        <tbody>${tw.map((w,i)=>`<tr>
+        <tbody>${tw.map((w,i)=>{
+          const ret=teamReturnsForWeek(weeks[i]);
+          return `<tr>
           <td>${labels[i]||w.week}</td>
           <td class="num"><strong>${fmt(w.points,1)}</strong></td>
           <td class="num">${fmt(w.pointsDay,2)}</td>
           <td class="num">${fmt(w.units)}</td>
           <td class="num">${fmt(w.days)}</td>
-        </tr>`).join('')}
+          <td class="num">${fmt(ret)}</td>
+        </tr>`;}).join('')}
         <tr style="background:#f8fafc;font-weight:600">
-          <td>Total</td>
+          <td>All weeks</td>
           <td class="num">${fmt(team.totalPoints,1)}</td>
           <td class="num">${fmt(team.avgPointsDay,2)}</td>
           <td class="num">${fmt(team.totalUnits)}</td>
           <td class="num">${fmt(team.totalDays)}</td>
+          <td class="num">${fmt(tw.reduce((s,_,i)=>s+teamReturnsForWeek(weeks[i]),0))}</td>
         </tr>
         </tbody>
       </table></div>
     </div>
 
     <div class="section">
-      <div class="section-title">What the team delivered</div>
+      <div class="section-title">What the crew delivered</div>
       <div class="unit-chips">${unitChips.map(u=>`<div class="unit-chip"><div class="ut">${u}</div><div class="uv">${fmt(unitTotals[u])}</div></div>`).join('')}</div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Team charts</div>
-      <div class="chart-grid">
-        <div class="chart-card full"><h3>Weekly points \u2014 who contributed</h3><div class="chart-wrap tall"><canvas id="t1"></canvas></div></div>
-        <div class="chart-card"><h3>Team pts / day trend</h3><div class="chart-wrap"><canvas id="t2"></canvas></div></div>
-        <div class="chart-card"><h3>Team units by week</h3><div class="chart-wrap"><canvas id="t3"></canvas></div></div>
-      </div>
-      <p class="note">Stacked bars show contribution to the whole, not a ranking. The trend lines are the crew\u2019s combined pace.</p>
     </div>`;
+
+  document.getElementById('team-scales').addEventListener('click', (e)=>{
+    const btn=e.target.closest('[data-scale]');
+    if(!btn) return;
+    TEAM_SCALE=btn.getAttribute('data-scale');
+    renderTeam();
+  });
+
+  const latest=tw.length-1;
+  const prev=latest>0?latest-1:-1;
+  charts.push(new Chart(document.getElementById('t0'),{
+    type:'bar',
+    data:{
+      labels: prev>=0?[labels[prev], labels[latest]]: [labels[latest]],
+      datasets:[{
+        data: prev>=0?[tw[prev].points, tw[latest].points]:[tw[latest].points],
+        backgroundColor: prev>=0?['#94a3b8','#2563eb']:['#2563eb'],
+        borderRadius:8,
+        barThickness:40
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
+  }));
+
+  const avgPD = team.avgPointsDay;
+  charts.push(new Chart(document.getElementById('t2'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Pts/day', data:tw.map(w=>w.pointsDay), borderColor:'#2563eb', backgroundColor:'#2563eb22', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5},
+      {label:'Avg', data:labels.map(()=>avgPD), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
+  }));
 
   charts.push(new Chart(document.getElementById('t1'),{
     type:'bar',
@@ -361,22 +484,14 @@ function renderTeam(){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}
   }));
 
-  charts.push(new Chart(document.getElementById('t2'),{
-    type:'line',
-    data:{labels,datasets:[{
-      label:'Team pts/day',
-      data:tw.map(w=>w.pointsDay),
-      borderColor:'#2563eb',backgroundColor:'#2563eb22',fill:true,tension:0.3,pointRadius:5,borderWidth:2.5
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
-  }));
-
   charts.push(new Chart(document.getElementById('t3'),{
     type:'bar',
     data:{labels,datasets:[{
-      label:'Units',
-      data:tw.map(w=>w.units),
-      backgroundColor:'#059669',borderRadius:6,barThickness:28
+      label:'Team points',
+      data:tw.map(w=>w.points),
+      backgroundColor:'#059669',
+      borderRadius:6,
+      barThickness:28
     }]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}
   }));
