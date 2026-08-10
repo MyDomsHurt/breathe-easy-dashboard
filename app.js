@@ -72,7 +72,7 @@ function renderOverview(){
   const names=Object.keys(DATA.technicians);
   charts.push(new Chart(document.getElementById('c3'),{type:'bar',data:{labels,datasets:names.map(n=>({label:n,data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}),backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p'}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}}));
 
-  charts.push(new Chart(document.getElementById('c4'),{type:'line',data:{labels,datasets:names.map(n=>({label:n,data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r&&r.workday>0?r.pointsDay:null;}),borderColor:TECH_COLORS[n],backgroundColor:TECH_COLORS[n],tension:0.3,pointRadius:4,borderWidth:2,spanGaps:false}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
+  charts.push(new Chart(document.getElementById('c4'),{type:'line',data:{labels,datasets:names.map(n=>({label:n,data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.pointsDay:0;}),borderColor:TECH_COLORS[n],backgroundColor:TECH_COLORS[n],tension:0.3,pointRadius:4,borderWidth:2,spanGaps:false}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
 }
 
 function renderTech(name){
@@ -133,7 +133,7 @@ function renderTech(name){
 
   const color=TECH_COLORS[name]||'#2563eb';
   const wl=weeks.map(w=>w.weekLabel);
-  charts.push(new Chart(document.getElementById('t1'),{type:'line',data:{labels:wl,datasets:[{data:weeks.map(w=>w.workday>0?w.pointsDay:null),borderColor:color,backgroundColor:color+'18',fill:true,tension:0.3,pointRadius:5,borderWidth:2.5,spanGaps:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
+  charts.push(new Chart(document.getElementById('t1'),{type:'line',data:{labels:wl,datasets:[{data:weeks.map(w=>w.pointsDay),borderColor:color,backgroundColor:color+'18',fill:true,tension:0.3,pointRadius:5,borderWidth:2.5,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
   charts.push(new Chart(document.getElementById('t2'),{type:'bar',data:{labels:wl,datasets:[{data:weeks.map(w=>w.points),backgroundColor:color,borderRadius:6,barThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}}}));
   charts.push(new Chart(document.getElementById('t3'),{type:'bar',data:{labels:wl,datasets:[
     {label:'S',data:weeks.map(w=>w.S||0),backgroundColor:'#2563eb',stack:'u'},
