@@ -3,7 +3,6 @@ const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3a
 let DATA=null, charts=[];
 function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
 function fmt(n,d=0){if(n==null||isNaN(n))return'\u2014';return Number(n).toLocaleString('en-HK',{maximumFractionDigits:d,minimumFractionDigits:d});}
-function fmtMoney(n){return'$'+fmt(n,0);}
 function pct(n){return(n>=0?'+':'')+fmt(n*100,0)+'%';}
 function badge(t){const x=(t||'Stable').toLowerCase();return `<span class="badge ${x}">${t}</span>`;}
 
@@ -59,10 +58,10 @@ function renderOverview(){
     </div>
     <div class="section"><div class="section-title">Points system</div>
       <div class="points-ref"><table>
-        <thead><tr><th>Unit</th><th class="num">Points</th><th class="num">Est. $</th><th>Note</th></tr></thead>
-        <tbody>${DATA.pointsTable.map(p=>`<tr><td class="name">${p.type}</td><td class="num">${fmt(p.points,2)}</td><td class="num">${fmtMoney(p.dollars)}</td><td style="color:var(--text-muted)">${p.note}</td></tr>`).join('')}</tbody>
+        <thead><tr><th>Unit type</th><th class="num">Points</th><th>Note</th></tr></thead>
+        <tbody>${DATA.pointsTable.map(p=>`<tr><td class="name">${p.type}</td><td class="num"><strong>${fmt(p.points,2)}</strong></td><td style="color:var(--text-muted)">${p.note}</td></tr>`).join('')}</tbody>
       </table>
-      <p class="note">Influencer units receive the same points. $ values estimated from paid work only.</p></div>
+      <p class="note">Influencer (free) units receive the same points as paid units of the same type.</p></div>
     </div>`;
 
   charts.push(new Chart(document.getElementById('c1'),{type:'doughnut',data:{labels:ranking.map(t=>t.name),datasets:[{data:ranking.map(t=>t.totalPoints),backgroundColor:ranking.map(t=>TECH_COLORS[t.name]),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw,1)} pts`}}},cutout:'62%'}}));
