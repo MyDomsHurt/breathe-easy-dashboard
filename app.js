@@ -35,16 +35,17 @@ function renderOverview(){
       <div class="kpi-card"><div class="label">Workdays</div><div class="value">${fmt(team.totalDays)}</div></div>
     </div>
     <div class="section"><div class="section-title">Competition</div>
+      <p class="scroll-hint">Swipe table sideways for more columns</p>
       <div class="table-wrap"><table>
-        <thead><tr><th>#</th><th>Technician</th><th class="num">Points</th><th class="num">Share</th><th class="num">Pts/Day</th><th class="num">vs Team</th><th class="num">Units</th><th class="num">U/Day</th><th>Status</th></tr></thead>
+        <thead><tr><th>#</th><th>Technician</th><th class="num">Points</th><th class="num hide-sm">Share</th><th class="num">Pts/Day</th><th class="num hide-sm">vs Team</th><th class="num hide-sm">Units</th><th class="num hide-sm">U/Day</th><th>Status</th></tr></thead>
         <tbody>${ranking.map((t,i)=>{
           const share=t.totalPoints/team.totalPoints;
           const vs=team.avgPointsDay?(t.pointsDay/team.avgPointsDay-1):0;
           return `<tr><td>${i+1}</td><td class="name"><a href="#/tech/${t.name}" style="color:inherit;text-decoration:none">${t.name}</a></td>
-            <td class="num"><strong>${fmt(t.totalPoints,1)}</strong></td><td class="num">${fmt(share*100,1)}%</td>
+            <td class="num"><strong>${fmt(t.totalPoints,1)}</strong></td><td class="num hide-sm">${fmt(share*100,1)}%</td>
             <td class="num">${fmt(t.pointsDay,2)}</td>
-            <td class="num" style="color:${vs>=0?'var(--green)':'var(--red)'}">${pct(vs)}</td>
-            <td class="num">${fmt(t.totalUnits)}</td><td class="num">${fmt(t.unitsDay,1)}</td><td>${badge(t.trend)}</td></tr>`;
+            <td class="num hide-sm" style="color:${vs>=0?'var(--green)':'var(--red)'}">${pct(vs)}</td>
+            <td class="num hide-sm">${fmt(t.totalUnits)}</td><td class="num hide-sm">${fmt(t.unitsDay,1)}</td><td>${badge(t.trend)}</td></tr>`;
         }).join('')}</tbody>
       </table></div>
     </div>
@@ -107,7 +108,8 @@ function renderTech(name){
       <div class="unit-chips">${unitOrder.filter(u=>(t.unitTotals||{})[u]>0).map(u=>`<div class="unit-chip"><div class="ut">${u}</div><div class="uv">${fmt(t.unitTotals[u])}</div></div>`).join('')}</div>
     </div>
     <div class="section"><div class="section-title">Week by week</div>
-      <div class="table-wrap"><table>
+      <p class="scroll-hint">Swipe table sideways for unit breakdown</p>
+      <div class="table-wrap"><table class="wide">
         <thead><tr><th>Week</th><th class="num">Points</th><th class="num">Pts/Day</th><th class="num">Units</th><th class="num">S</th><th class="num">W</th><th class="num">B</th><th class="num">C</th><th class="num">Days</th><th class="num">Infl</th><th class="num">Returns</th></tr></thead>
         <tbody>${weeks.map(w=>{
           const zero=w.totalUnits===0&&w.workday===0;
