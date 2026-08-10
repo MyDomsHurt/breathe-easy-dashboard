@@ -47,6 +47,11 @@ body {
   top: 0;
   z-index: 1000;
 }
+.nav-spacer {
+  display: none;
+  height: 0;
+  pointer-events: none;
+}
 .nav-inner {
   max-width: 1120px;
   margin: 0 auto;
@@ -306,40 +311,51 @@ td.name { font-weight: 500; }
 /* ========== Mobile ========== */
 @media (max-width: 768px) {
   /*
-    Sticky (not fixed): bar stays visible while scrolling down,
-    document still starts at the true top so scroll-back-up works.
+    Fixed nav + in-flow spacer (not body padding):
+    bar stays visible on iOS; spacer preserves real document top.
+    Links stay one compact horizontal row.
   */
   .nav {
-    position: -webkit-sticky;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     background: #ffffff;
     border-bottom: 1px solid var(--border);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .nav-spacer {
+    display: block;
+    height: calc(96px + env(safe-area-inset-top, 0px));
   }
   .nav-inner {
     flex-direction: column;
     align-items: stretch;
     height: auto;
     min-height: 0;
-    padding: 10px 12px;
-    gap: 8px;
+    padding: 8px 12px 10px;
+    gap: 6px;
   }
   .nav-brand {
-    font-size: 14px;
+    font-size: 13px;
   }
+  .nav-brand span { display: none; }
   .nav-links {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-start;
     gap: 6px;
     width: 100%;
-    max-width: 100%;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .nav-links::-webkit-scrollbar { display: none; }
   .nav-links a {
-    padding: 7px 11px;
-    font-size: 13px;
+    padding: 6px 10px;
+    font-size: 12px;
     background: var(--border-soft);
     flex: 0 0 auto;
   }
