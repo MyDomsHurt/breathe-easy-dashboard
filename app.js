@@ -33,7 +33,7 @@ function renderOverview(){
       <div class="kpi-card"><div class="label">Total Points</div><div class="value">${fmt(team.totalPoints,1)}</div></div>
       <div class="kpi-card"><div class="label">Team Pts / Day</div><div class="value">${fmt(team.avgPointsDay,2)}</div></div>
       <div class="kpi-card"><div class="label">Total Units</div><div class="value">${fmt(team.totalUnits)}</div></div>
-      <div class="kpi-card"><div class="label">Total Revenue</div><div class="value">${fmtMoney(team.totalRevenue)}</div></div>
+      <div class="kpi-card"><div class="label">Workdays</div><div class="value">${fmt(team.totalDays)}</div></div>
     </div>
     <div class="section"><div class="section-title">Competition</div>
       <div class="table-wrap"><table>
@@ -92,8 +92,8 @@ function renderTech(name){
       <div class="kpi-card"><div class="label">Pts / Day</div><div class="value">${fmt(t.pointsDay,2)}</div></div>
       <div class="kpi-card"><div class="label">Total Units</div><div class="value">${fmt(t.totalUnits)}</div></div>
       <div class="kpi-card"><div class="label">Units / Day</div><div class="value">${fmt(t.unitsDay,1)}</div></div>
-      <div class="kpi-card"><div class="label">Revenue</div><div class="value">${fmtMoney(t.totalAmount)}</div></div>
       <div class="kpi-card"><div class="label">Workdays</div><div class="value">${fmt(t.totalDays)}</div></div>
+      <div class="kpi-card"><div class="label">Returns</div><div class="value">${fmt(t.totalReturns)}</div></div>
     </div>
     <div class="progress-strip">
       ${badge(t.trend)}
@@ -109,17 +109,17 @@ function renderTech(name){
     </div>
     <div class="section"><div class="section-title">Week by week</div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Week</th><th class="num">Points</th><th class="num">Pts/Day</th><th class="num">Units</th><th class="num">S</th><th class="num">W</th><th class="num">B</th><th class="num">C</th><th class="num">Days</th><th class="num">Revenue</th><th class="num">Infl</th><th class="num">Returns</th></tr></thead>
+        <thead><tr><th>Week</th><th class="num">Points</th><th class="num">Pts/Day</th><th class="num">Units</th><th class="num">S</th><th class="num">W</th><th class="num">B</th><th class="num">C</th><th class="num">Days</th><th class="num">Infl</th><th class="num">Returns</th></tr></thead>
         <tbody>${weeks.map(w=>{
           const zero=w.totalUnits===0&&w.workday===0;
           return `<tr class="${zero?'zero-row':''}"><td>${w.weekLabel}</td><td class="num"><strong>${fmt(w.points,1)}</strong></td><td class="num">${fmt(w.pointsDay,2)}</td><td class="num">${fmt(w.totalUnits)}</td>
             <td class="num">${w.S||'\u2014'}</td><td class="num">${w.W||'\u2014'}</td><td class="num">${w.B||'\u2014'}</td><td class="num">${w.C||'\u2014'}</td>
-            <td class="num">${w.workday||'\u2014'}</td><td class="num">${w.amount?fmtMoney(w.amount):'\u2014'}</td>
+            <td class="num">${w.workday||'\u2014'}</td>
             <td class="num">${w.inflPoints?fmt(w.inflPoints,1):'\u2014'}</td><td class="num">${w.returns||'\u2014'}</td></tr>`;
         }).join('')}
         <tr style="background:#f8fafc;font-weight:600"><td>Total</td><td class="num">${fmt(t.totalPoints,1)}</td><td class="num">${fmt(t.pointsDay,2)}</td><td class="num">${fmt(t.totalUnits)}</td>
           <td class="num">${(t.unitTotals||{}).S||0}</td><td class="num">${(t.unitTotals||{}).W||0}</td><td class="num">${(t.unitTotals||{}).B||0}</td><td class="num">${(t.unitTotals||{}).C||0}</td>
-          <td class="num">${fmt(t.totalDays)}</td><td class="num">${fmtMoney(t.totalAmount)}</td><td class="num">${fmt(t.totalInflPoints,1)}</td><td class="num">${fmt(t.totalReturns)}</td></tr>
+          <td class="num">${fmt(t.totalDays)}</td><td class="num">${fmt(t.totalInflPoints,1)}</td><td class="num">${fmt(t.totalReturns)}</td></tr>
         </tbody>
       </table></div>
       <p class="note">Zero weeks highlighted. Influencer units count full points.</p>
