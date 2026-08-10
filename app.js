@@ -1,4 +1,9 @@
-/* Breathe-Easy Dashboard */
+/* Breathe-Easy Dashboard
+ * Static SPA: Competition | Full Team | Personal profiles
+ * Data: data.json (totals/ranking/points table) + weeks.json (time series)
+ * Mobile: fixed nav + measured spacer (syncNavSpacer). No overflow-x:hidden on body.
+ * Charts: Chart.js. One hero chart per page. No revenue in UI.
+ */
 const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3aed',Tiago:'#0891b2'};
 let DATA=null, charts=[], RANK_MODE='day', TEAM_SCALE='week';
 
@@ -132,12 +137,17 @@ function teamWeekly(){
   const weeks=DATA.weeks||[];
   const names=Object.keys(DATA.technicians);
   return weeks.map(w=>{
-    let points=0, units=0, days=0;
+    let points=0, units=0, days=0, returns=0;
     for(const n of names){
       const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);
-      if(r){points+=r.points||0; units+=r.totalUnits||0; days+=r.workday||0;}
+      if(r){
+        points+=r.points||0;
+        units+=r.totalUnits||0;
+        days+=r.workday||0;
+        returns+=r.returns||0;
+      }
     }
-    return {week:w, points, units, days, pointsDay: days?points/days:0};
+    return {week:w, points, units, days, returns, pointsDay: days?points/days:0};
   });
 }
 function teamUnitTotals(){
@@ -149,14 +159,6 @@ function teamUnitTotals(){
   }
   return totals;
 }
-function teamReturnsForWeek(weekKey){
-  let sum=0;
-  for(const n of Object.keys(DATA.technicians)){
-    const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===weekKey);
-    if(r) sum+=(r.returns||0);
-  }
-  return sum;
-}
 function teamScaleStats(scale){
   const tw=teamWeekly();
   const labels=DATA.weekLabels||[];
@@ -165,23 +167,22 @@ function teamScaleStats(scale){
   const quarterKey=currentQuarterKey();
   const latest=tw.length-1;
   if(scale==='week'){
-    const cur=tw[latest]||{points:0,pointsDay:0,units:0,days:0};
+    const cur=tw[latest]||{points:0,pointsDay:0,units:0,days:0,returns:0};
     const prev=latest>0?tw[latest-1]:null;
-    const returns=teamReturnsForWeek(weeks[latest]);
     return {
       label: labels[latest]||'This week',
-      points: cur.points, pointsDay: cur.pointsDay, units: cur.units, days: cur.days, returns,
+      points: cur.points, pointsDay: cur.pointsDay, units: cur.units, days: cur.days, returns: cur.returns||0,
       prevPoints: prev?prev.points:null, prevPointsDay: prev?prev.pointsDay:null,
       prevLabel: latest>0?(labels[latest-1]||'Prior'):null
     };
   }
   if(scale==='month'){
     let points=0,units=0,days=0,returns=0;
-    tw.forEach((row,i)=>{ if(weekMonth(weeks[i])===monthKey){ points+=row.points; units+=row.units; days+=row.days; returns+=teamReturnsForWeek(weeks[i]); } });
+    tw.forEach((row,i)=>{ if(weekMonth(weeks[i])===monthKey){ points+=row.points; units+=row.units; days+=row.days; returns+=row.returns||0; } });
     return { label: monthLabel(monthKey), points, pointsDay: days?points/days:0, units, days, returns, prevPoints:null, prevPointsDay:null, prevLabel:null };
   }
   let points=0,units=0,days=0,returns=0;
-  tw.forEach((row,i)=>{ if(weekQuarter(weeks[i])===quarterKey){ points+=row.points; units+=row.units; days+=row.days; returns+=teamReturnsForWeek(weeks[i]); } });
+  tw.forEach((row,i)=>{ if(weekQuarter(weeks[i])===quarterKey){ points+=row.points; units+=row.units; days+=row.days; returns+=row.returns||0; } });
   return { label: quarterLabel(quarterKey), points, pointsDay: days?points/days:0, units, days, returns, prevPoints:null, prevPointsDay:null, prevLabel:null };
 }
 function teamStory(stats, scale, tw){
@@ -329,7 +330,6 @@ function renderCompetition(){
     }))},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}
   }));
-  afterPaint(syncNavSpacer);
 }
 
 function renderTeam(){
@@ -378,7 +378,7 @@ function renderTeam(){
           <td class="num">${fmt(w.pointsDay,2)}</td>
           <td class="num">${fmt(w.units)}</td>
           <td class="num">${fmt(w.days)}</td>
-          <td class="num">${fmt(teamReturnsForWeek(weeks[i]))}</td>
+          <td class="num">${fmt(w.returns||0)}</td>
         </tr>`).join('')}
         <tr style="background:#f8fafc;font-weight:600">
           <td>All weeks</td>
@@ -386,7 +386,7 @@ function renderTeam(){
           <td class="num">${fmt(team.avgPointsDay,2)}</td>
           <td class="num">${fmt(team.totalUnits)}</td>
           <td class="num">${fmt(team.totalDays)}</td>
-          <td class="num">${fmt(tw.reduce((s,_,i)=>s+teamReturnsForWeek(weeks[i]),0))}</td>
+          <td class="num">${fmt(tw.reduce((s,w)=>s+(w.returns||0),0))}</td>
         </tr>
         </tbody>
       </table></div>
@@ -409,7 +409,6 @@ function renderTeam(){
   const avgPD = team.avgPointsDay;
   charts.push(new Chart(document.getElementById('t2'),{ type:'line', data:{labels,datasets:[ {label:'Pts/day', data:tw.map(w=>w.pointsDay), borderColor:'#2563eb', backgroundColor:'#2563eb22', fill:true, tension:0.3, pointRadius:5, borderWidth:2.5}, {label:'Avg', data:labels.map(()=>avgPD), borderColor:'#94a3b8', borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false} ]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f5f9'}}}} }));
   charts.push(new Chart(document.getElementById('t1'),{ type:'bar', data:{labels,datasets:names.map(n=>({ label:n, data:weeks.map(w=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);return r?r.points:0;}), backgroundColor:TECH_COLORS[n],borderRadius:4,stack:'p' }))}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}} }));
-  afterPaint(syncNavSpacer);
 }
 
 function renderTech(name){
@@ -517,7 +516,6 @@ function renderTech(name){
     {label:'B',data:weeks.map(w=>w.B||0),backgroundColor:'#d97706',stack:'u'},
     {label:'C',data:weeks.map(w=>w.C||0),backgroundColor:'#7c3aed',stack:'u'}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:14}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f1f5f9'}}}}}));
-  afterPaint(syncNavSpacer);
 }
 
 function route(){
@@ -527,7 +525,6 @@ function route(){
   else renderCompetition();
   scrollTopAndSync();
 }
-document.body.style.paddingTop='';
 loadData().then(()=>{
   route();
   window.addEventListener('hashchange', route);
