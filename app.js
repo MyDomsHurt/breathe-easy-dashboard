@@ -1,7 +1,8 @@
 /* Breathe-Easy Dashboard
  * Static SPA: Competition | Full Team | Personal profiles
- * Data: data.json (totals/ranking/points table) + weeks.json (time series)
- * Mobile: fixed nav + measured spacer (syncNavSpacer). No overflow-x:hidden on body.
+ * Data: data.json + weeks.json (merged at load)
+ * Layout: app shell — nav in document flow, #app is the only scroll container.
+ *   Never use position:fixed/sticky on nav. Never use a nav spacer.
  * Charts: Chart.js. One hero chart per page. No revenue in UI.
  */
 const TECH_COLORS = {Matthew:'#2563eb',Nick:'#059669',Iggi:'#d97706',Alun:'#7c3aed',Tiago:'#0891b2'};
@@ -21,25 +22,9 @@ async function loadData(){
   }
 }
 
-function syncNavSpacer(){
-  const nav=document.querySelector('.nav');
-  const spacer=document.getElementById('nav-spacer');
-  if(!nav||!spacer) return;
-  if(window.matchMedia('(max-width: 768px)').matches){
-    const h=Math.ceil(nav.getBoundingClientRect().height);
-    spacer.style.display='block';
-    spacer.style.height=h+'px';
-  } else {
-    spacer.style.display='none';
-    spacer.style.height='0px';
-  }
-}
-function afterPaint(fn){
-  requestAnimationFrame(()=>requestAnimationFrame(fn));
-}
-function scrollTopAndSync(){
-  window.scrollTo(0,0);
-  afterPaint(()=>{ window.scrollTo(0,0); syncNavSpacer(); });
+function scrollMainTop(){
+  const main=document.getElementById('app');
+  if(main) main.scrollTop=0;
 }
 function setNav(active){
   const links=[
@@ -51,7 +36,6 @@ function setNav(active){
     const isActive = active===l.href || (l.href!=='#/compete' && l.href!=='#/team' && active.startsWith(l.href));
     return `<a href="${l.href}" class="${isActive?'active':''}">${l.label}</a>`;
   }).join('');
-  afterPaint(()=>{ syncNavSpacer(); });
 }
 
 function gapToNext(sorted, i){
@@ -523,13 +507,9 @@ function route(){
   if(hash.startsWith('#/tech/')) renderTech(decodeURIComponent(hash.replace('#/tech/','')));
   else if(hash==='#/team') renderTeam();
   else renderCompetition();
-  scrollTopAndSync();
+  scrollMainTop();
 }
 loadData().then(()=>{
   route();
   window.addEventListener('hashchange', route);
-  window.addEventListener('resize', ()=>{ syncNavSpacer(); });
-  window.addEventListener('orientationchange', ()=>{ afterPaint(syncNavSpacer); });
-  afterPaint(syncNavSpacer);
-  setTimeout(syncNavSpacer, 300);
 });
