@@ -15,21 +15,11 @@ async function loadData(){
   }
 }
 
-function syncNavOffset(){
-  const nav=document.querySelector('.nav');
-  if(!nav) return;
-  if(window.matchMedia('(max-width: 768px)').matches){
-    document.body.style.paddingTop=nav.offsetHeight+'px';
-  } else {
-    document.body.style.paddingTop='';
-  }
-}
 function setNav(active){
   const links=[{href:'#/',label:'Overview'},...Object.keys(DATA.technicians).map(t=>({href:`#/tech/${t}`,label:t}))];
   document.getElementById('nav-links').innerHTML=links.map(l=>
     `<a href="${l.href}" class="${(active===l.href||(l.href!=='#/'&&active.startsWith(l.href)))?'active':''}">${l.label}</a>`
   ).join('');
-  requestAnimationFrame(syncNavOffset);
 }
 
 function renderOverview(){
@@ -160,4 +150,5 @@ function route(){
   if(hash.startsWith('#/tech/')) renderTech(decodeURIComponent(hash.replace('#/tech/','')));
   else renderOverview();
 }
-loadData().then(()=>{route();window.addEventListener('hashchange',route);window.addEventListener('resize',syncNavOffset);});
+document.body.style.paddingTop='';
+loadData().then(()=>{route();window.addEventListener('hashchange',route);});
