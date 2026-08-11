@@ -1,8 +1,8 @@
-/* Direction A Chart.js craft — load after Chart.js, before app.js */
+/* Dark overhaul Chart.js — load after Chart.js, before app.js */
 (function () {
-  const ACCENT = '#0d9488';
-  const GRID = 'rgba(28,25,23,0.06)';
-  const TICK = '#a8a29e';
+  const ACCENT = '#2dd4bf';
+  const GRID = 'rgba(255,255,255,0.06)';
+  const TICK = '#71717a';
   const OrigChart = window.Chart;
   if (!OrigChart) return;
 
@@ -16,16 +16,19 @@
     OrigChart.defaults.plugins.legend.labels.padding = 14;
     OrigChart.defaults.plugins.legend.labels.usePointStyle = true;
     OrigChart.defaults.plugins.legend.labels.pointStyle = 'circle';
-    OrigChart.defaults.plugins.tooltip.backgroundColor = 'rgba(28,25,23,0.92)';
+    OrigChart.defaults.plugins.legend.labels.color = '#a1a1aa';
+    OrigChart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,17,23,0.95)';
+    OrigChart.defaults.plugins.tooltip.titleColor = '#f4f4f5';
+    OrigChart.defaults.plugins.tooltip.bodyColor = '#d4d4d8';
+    OrigChart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.08)';
+    OrigChart.defaults.plugins.tooltip.borderWidth = 1;
     OrigChart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 12 };
     OrigChart.defaults.plugins.tooltip.bodyFont = { size: 12 };
-    OrigChart.defaults.plugins.tooltip.padding = 10;
-    OrigChart.defaults.plugins.tooltip.cornerRadius = 8;
-    OrigChart.defaults.plugins.tooltip.displayColors = true;
-    OrigChart.defaults.plugins.tooltip.boxPadding = 4;
-    OrigChart.defaults.elements.bar.borderRadius = 5;
+    OrigChart.defaults.plugins.tooltip.padding = 12;
+    OrigChart.defaults.plugins.tooltip.cornerRadius = 10;
+    OrigChart.defaults.elements.bar.borderRadius = 6;
     OrigChart.defaults.elements.bar.borderSkipped = false;
-    OrigChart.defaults.elements.line.borderWidth = 2.25;
+    OrigChart.defaults.elements.line.borderWidth = 2.5;
     OrigChart.defaults.elements.point.radius = 3.5;
     OrigChart.defaults.elements.point.hoverRadius = 5;
     OrigChart.defaults.scale.grid.color = GRID;
@@ -49,26 +52,34 @@
           }
         });
       }
+      if (config && config.options && config.options.plugins && config.options.plugins.legend && config.options.plugins.legend.labels) {
+        config.options.plugins.legend.labels.color = '#a1a1aa';
+      }
       const datasets = config && config.data && config.data.datasets;
       if (datasets) {
         datasets.forEach(function (ds) {
           if (ds.borderColor === '#1481c3') ds.borderColor = ACCENT;
           if (typeof ds.backgroundColor === 'string' && ds.backgroundColor.indexOf('#1481c3') === 0)
-            ds.backgroundColor = ACCENT + ds.backgroundColor.slice(7);
+            ds.backgroundColor = ACCENT + (ds.backgroundColor.length > 7 ? ds.backgroundColor.slice(7) : '33');
           if (Array.isArray(ds.backgroundColor)) {
             ds.backgroundColor = ds.backgroundColor.map(function (c) {
               if (c === '#1481c3') return ACCENT;
               if (c === '#154487') return '#a855f7';
-              if (c === '#16a34a') return '#22c55e';
-              if (c === '#fb8e28') return '#f97316';
-              if (c === '#59bcee') return '#0ea5e9';
+              if (c === '#16a34a') return '#4ade80';
+              if (c === '#fb8e28') return '#fb923c';
+              if (c === '#59bcee') return '#38bdf8';
+              if (c === '#94a3b8') return '#71717a';
               return c;
             });
           }
-          if (ds.label === 'S') ds.backgroundColor = '#2563eb';
-          if (ds.label === 'W') ds.backgroundColor = '#22c55e';
-          if (ds.label === 'B') ds.backgroundColor = '#f97316';
-          if (ds.label === 'C') ds.backgroundColor = '#a855f7';
+          if (ds.borderColor === '#94a3b8') ds.borderColor = '#71717a';
+          if (ds.label === 'S') ds.backgroundColor = '#3b82f6';
+          if (ds.label === 'W') ds.backgroundColor = '#4ade80';
+          if (ds.label === 'B') ds.backgroundColor = '#fb923c';
+          if (ds.label === 'C') ds.backgroundColor = '#c084fc';
+          if (ds.label === 'Avg' || ds.label === 'Your avg') {
+            ds.borderColor = '#71717a';
+          }
         });
       }
     } catch (e) {}
