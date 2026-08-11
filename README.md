@@ -40,7 +40,7 @@ Technicians in fixed display order:
 Full Team · Matthew · Tiago · Nick · Alun · Iggi  |  Competition
 ```
 
-Competition sits at the end, separated by a vertical rule, so it reads as its own mode — not part of the crew strip.
+Competition sits at the end, separated by a vertical rule.
 
 ---
 
@@ -53,11 +53,7 @@ Competition sits at the end, separated by a vertical rule, so it reads as its ow
 | `body` | Full viewport flex column, `overflow: hidden` |
 | `nav` | **In document flow** (`position: relative`) — never `fixed` or `sticky` |
 | `#app` (`.main`) | **Only** scroll container (`flex: 1; min-height: 0; overflow-y: auto`) |
-| Spacer | **None** — no measured header offset |
-
-This is what fixed the recurring mobile “can’t scroll back to top / content under nav” bugs. Reintroducing `position: fixed` on the nav will bring them back.
-
-On route change, scroll resets via `scrollMainTop()` on `#app` (not `window`).
+| Spacer | **None** |
 
 ---
 
@@ -65,15 +61,35 @@ On route change, scroll resets via `scrollMainTop()` on `#app` (not `window`).
 
 | File | Role |
 |------|------|
-| `index.html` | Shell + Chart.js CDN + cache-busted CSS/JS |
-| `styles.css` | App shell, UI, brand tokens |
+| `index.html` | Shell + Chart.js + cache-busted assets |
+| `styles.css` | App shell + Direction A UI tokens |
+| `chart-wrap.js` | Chart.js colour/grid overrides (before app.js) |
+| `colors-patch.js` | TECH_COLORS vivid series (after app.js) |
 | `app.js` | Routing, aggregation, charts, `TECH_ORDER` |
-| `data.json` | Team totals, ranking seed, points table (no revenue) |
-| `weeks.json` | Per-technician week rows (merged into `DATA` at load) |
+| `data.json` | Team totals, ranking seed, points table |
+| `weeks.json` | Per-technician week rows |
 
-`app.js` loads both JSON files and attaches `weeks` onto each technician.
+After UI changes, bump `?v=` on assets in `index.html`.
 
-After UI changes, bump `?v=` on `styles.css` / `app.js` in `index.html` so Pages/CDN clients get the new build.
+---
+
+## Design (Direction A)
+
+**Neutral stage + vivid series. Teal is the only UI accent. Brand navy only on the wordmark.**
+
+| Token | Value | Use |
+|-------|--------|-----|
+| Page background | `#f7f6f3` | Warm stone stage |
+| Text | Charcoal / stone | UI chrome |
+| **Accent (teal)** | `#0d9488` | Active nav, pills, team system charts |
+| **Brand navy** | `#154487` | **Wordmark only** |
+| Matthew | `#2563eb` | Chart series |
+| Tiago | `#0ea5e9` | Chart series |
+| Nick | `#22c55e` | Chart series |
+| Alun | `#a855f7` | Chart series |
+| Iggi | `#f97316` | Chart series |
+
+Do **not** flood the UI with brand blue. Data carries colour; the frame stays neutral.
 
 ---
 
@@ -90,58 +106,24 @@ After UI changes, bump `?v=` on `styles.css` / `app.js` in `index.html` so Pages
 | SwG | 1.30 |
 | EF / PAU | 1.00 |
 
-**Influencer units** score the same points as paid units of the same type. They are not used when deriving the points-per-unit calibration from revenue (that logic lives in the source spreadsheet work; the web app only displays the final points).
+**Influencer units** score the same points as paid units of the same type.
 
-**No revenue / Est. $** anywhere in the UI or in the served data files.
-
----
-
-## Colour / design notes
-
-Current UI tokens lean on the public site palette (optional for an internal board):
-
-| Token | Hex | Use |
-|-------|-----|-----|
-| Navy | `#154487` | Titles, strong text, Alun series |
-| Blue | `#1481c3` | Primary / active, Matthew series |
-| Sky | `#59bcee` | Accent, Tiago series |
-| Orange | `#fb8e28` | Warm accent, Iggi series |
-| Green | `#16a34a` | Positive / Nick series |
-
-Chart series colours follow technicians; rank order is independent of nav order.
-
-Soft / minimal layout: Inter, light cards, Chart.js. Structure is stable; visual direction may still evolve (e.g. neutral stage vs brand-blue chrome).
+**No revenue** in the UI or served data files.
 
 ---
 
 ## Competition metrics
 
-On `#/compete`, ranking modes:
-
-1. **Pts / Day** — pace (fair when days worked differ)
-2. **This Week** — output this week
-3. **Month** — output in the current month
-4. **Quarter** — output in the current quarter
-
-All four are intentional ways to compete.
+1. **Pts / Day** — pace
+2. **This Week** — weekly output
+3. **Month** — current month output
+4. **Quarter** — current quarter output
 
 ---
 
 ## Update data
 
 1. Edit `data.json` and/or `weeks.json`
-2. Keep technician names consistent with `TECH_ORDER` / existing keys
+2. Keep technician names consistent with `TECH_ORDER`
 3. Push to `main`
-4. GitHub Pages deploys from `main` automatically
-
-Zero-output weeks must still appear as **0** (not missing) so line charts stay continuous (e.g. Tiago).
-
----
-
-## Local check
-
-Open `index.html` via any static server (or the live Pages URL). Hash routes:
-
-- `/#/team`
-- `/#/compete`
-- `/#/tech/Matthew`
+4. Zero-output weeks must appear as **0** (not missing) for continuous line charts
