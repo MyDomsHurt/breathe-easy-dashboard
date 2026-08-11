@@ -1,22 +1,39 @@
-/* layout-patch.js — Full Team visual closer to core reference poster
+/* layout-patch.js — Full Team closer to core reference (English only, artistic)
    Sculptural hero · skyline · water splash · letter badges · dark crew board
 */
 (function () {
   const LETTER = { Matthew: 'M', Tiago: 'T', Nick: 'N', Alun: 'A', Iggi: 'I' };
 
   function skylineSvg() {
-    return `<svg class="skyline" viewBox="0 0 800 90" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-      <path fill="rgba(255,255,255,0.18)" d="M0 90 V55 H18 V38 H28 V55 H42 V28 H52 V55 H68 V42 H78 V55 H95 V22 H108 V55 H125 V48 H138 V18 H152 V55 H170 V35 H185 V55 H200 V12 H215 V55 H235 V40 H250 V55 H270 V25 H285 V55 H305 V45 H320 V8 H340 V55 H360 V30 H375 V55 H395 V38 H410 V55 H430 V20 H448 V55 H465 V42 H480 V55 H500 V15 H520 V55 H540 V35 H555 V55 H575 V28 H590 V55 H610 V40 H625 V55 H645 V22 H660 V55 H680 V48 H695 V55 H715 V30 H730 V55 H750 V18 H765 V55 H785 V42 H800 V90 Z"/>
-      <path fill="rgba(255,255,255,0.08)" d="M0 90 V62 H40 V50 H80 V62 H120 V45 H160 V62 H200 V55 H240 V62 H280 V40 H320 V62 H360 V52 H400 V62 H440 V48 H480 V62 H520 V38 H560 V62 H600 V50 H640 V62 H680 V42 H720 V62 H760 V55 H800 V90 Z"/>
+    return `<svg class="skyline" viewBox="0 0 900 100" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.22)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0.04)"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#skyGrad)" d="M0 100 V58 H14 V40 H24 V58 H38 V30 H48 V58 H62 V45 H72 V58 H88 V24 H100 V58 H116 V50 H128 V20 H140 V58 H156 V38 H170 V58 H186 V14 H200 V58 H218 V42 H232 V58 H250 V28 H264 V58 H282 V48 H296 V10 H314 V58 H332 V32 H346 V58 H364 V40 H378 V58 H396 V22 H412 V58 H428 V44 H442 V58 H460 V16 H476 V58 H494 V36 H508 V58 H526 V30 H540 V58 H558 V42 H572 V58 H590 V24 H604 V58 H622 V50 H636 V58 H654 V32 H668 V58 H686 V46 H700 V58 H718 V20 H734 V58 H752 V38 H766 V58 H784 V26 H798 V58 H816 V44 H830 V58 H848 V18 H864 V58 H882 V40 H896 V58 H900 V100 Z"/>
+      <path fill="rgba(255,255,255,0.08)" d="M0 100 V66 H50 V54 H100 V66 H150 V48 H200 V66 H250 V58 H300 V66 H350 V44 H400 V66 H450 V52 H500 V66 H550 V40 H600 V66 H650 V54 H700 V66 H750 V46 H800 V66 H850 V56 H900 V100 Z"/>
     </svg>`;
   }
 
   function splashSvg() {
-    return `<svg class="hero-splash" viewBox="0 0 420 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      <path fill="rgba(94,200,240,0.35)" d="M0 80 Q40 40 90 70 T180 55 T270 75 T360 50 T420 70 V120 H0 Z"/>
-      <path fill="rgba(0,130,200,0.4)" d="M0 95 Q60 55 120 85 T240 65 T360 90 T420 75 V120 H0 Z"/>
-      <path fill="rgba(255,255,255,0.25)" d="M20 100 Q80 70 140 95 T260 80 T380 100 T420 90 V120 H0 Z"/>
-      <path fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" d="M10 85 Q70 45 130 80 T250 60 T370 85"/>
+    return `<svg class="hero-splash" viewBox="0 0 480 140" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <linearGradient id="w1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(94,200,240,0.55)"/>
+          <stop offset="100%" stop-color="rgba(0,130,200,0.15)"/>
+        </linearGradient>
+        <linearGradient id="w2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(0,130,200,0.5)"/>
+          <stop offset="100%" stop-color="rgba(15,31,74,0.2)"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#w1)" d="M0 90 Q50 35 110 75 T220 55 T330 80 T440 50 T480 70 V140 H0 Z"/>
+      <path fill="url(#w2)" d="M0 105 Q70 50 140 90 T280 65 T400 95 T480 80 V140 H0 Z"/>
+      <path fill="rgba(255,255,255,0.28)" d="M10 115 Q90 70 160 105 T300 85 T420 110 T480 95 V140 H0 Z"/>
+      <path fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.8" d="M5 95 Q80 40 150 85 T290 60 T420 90"/>
+      <path fill="none" stroke="rgba(94,200,240,0.4)" stroke-width="1.2" d="M20 110 Q100 65 180 100 T320 75 T460 105"/>
     </svg>`;
   }
 
@@ -48,6 +65,7 @@
 
       return `
         ${skylineSvg()}
+        <div class="poster-glow"></div>
         <div class="poster-top-row">
           <div class="poster-brand-block">
             <div class="poster-logo-mark">Breathe-Easy</div>
@@ -58,7 +76,6 @@
         <div class="poster-main">
           <div class="poster-mission">
             <div class="mission-label">OUR MISSION</div>
-            <p class="mission-zh">深呼吸每一口，潔淨每一個空間，為香港帶來更健康的空氣。</p>
             <p class="mission-en">Breathing deeper. Cleaning deeper.<br>Healthier air for Hong Kong.</p>
             <div class="story-chips">${chips.join('')}</div>
           </div>
@@ -138,7 +155,6 @@
         </div>`;
     };
 
-    const origRenderTeam = renderTeam;
     renderTeam = function () {
       destroyCharts();
       setNav('#/team');
@@ -216,7 +232,7 @@
           <div class="unit-chips">${unitChips.map(u => `<div class="unit-chip"><div class="ut">${u}</div><div class="uv">${fmt(unitTotals[u])}</div></div>`).join('')}</div>
         </div>
         <div class="poster-bottom-tag">
-          我們呼吸同一口空氣，一起做得更好。<br>
+          One team. One standard. Cleaner air for Hong Kong.<br>
           <span>Breathe-Easy AC Cleaning Crew · Hong Kong · Proudly Local</span>
         </div>
       `;
