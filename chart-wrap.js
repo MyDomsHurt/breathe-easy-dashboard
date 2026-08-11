@@ -1,16 +1,52 @@
-/* Direction A Chart.js wrapper — load after Chart.js, before app.js */
+/* Direction A Chart.js craft — load after Chart.js, before app.js */
 (function () {
   const ACCENT = '#0d9488';
-  const GRID = '#e7e5e4';
+  const GRID = 'rgba(28,25,23,0.06)';
+  const TICK = '#a8a29e';
   const OrigChart = window.Chart;
   if (!OrigChart) return;
+
+  try {
+    OrigChart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    OrigChart.defaults.font.size = 11;
+    OrigChart.defaults.font.weight = '500';
+    OrigChart.defaults.color = TICK;
+    OrigChart.defaults.plugins.legend.labels.boxWidth = 10;
+    OrigChart.defaults.plugins.legend.labels.boxHeight = 10;
+    OrigChart.defaults.plugins.legend.labels.padding = 14;
+    OrigChart.defaults.plugins.legend.labels.usePointStyle = true;
+    OrigChart.defaults.plugins.legend.labels.pointStyle = 'circle';
+    OrigChart.defaults.plugins.tooltip.backgroundColor = 'rgba(28,25,23,0.92)';
+    OrigChart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 12 };
+    OrigChart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+    OrigChart.defaults.plugins.tooltip.padding = 10;
+    OrigChart.defaults.plugins.tooltip.cornerRadius = 8;
+    OrigChart.defaults.plugins.tooltip.displayColors = true;
+    OrigChart.defaults.plugins.tooltip.boxPadding = 4;
+    OrigChart.defaults.elements.bar.borderRadius = 5;
+    OrigChart.defaults.elements.bar.borderSkipped = false;
+    OrigChart.defaults.elements.line.borderWidth = 2.25;
+    OrigChart.defaults.elements.point.radius = 3.5;
+    OrigChart.defaults.elements.point.hoverRadius = 5;
+    OrigChart.defaults.scale.grid.color = GRID;
+    OrigChart.defaults.scale.grid.drawBorder = false;
+    OrigChart.defaults.scale.ticks.color = TICK;
+    OrigChart.defaults.scale.ticks.padding = 6;
+  } catch (e) {}
+
   function Chart(ctx, config) {
     try {
       const scales = config && config.options && config.options.scales;
       if (scales) {
         Object.keys(scales).forEach(function (k) {
-          const g = scales[k] && scales[k].grid;
-          if (g && g.color) g.color = GRID;
+          const axis = scales[k] || (scales[k] = {});
+          axis.grid = axis.grid || {};
+          axis.grid.color = GRID;
+          axis.grid.drawBorder = false;
+          if (axis.ticks) {
+            axis.ticks.color = TICK;
+            axis.ticks.font = axis.ticks.font || { size: 11, weight: '500' };
+          }
         });
       }
       const datasets = config && config.data && config.data.datasets;
