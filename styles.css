@@ -147,3 +147,71 @@ thead th,tbody td{padding:10px}
 .kpi-card .value{font-size:16px}
 .nav-links a{padding:6px 9px;font-size:12px}
 }
+
+/* —— Auth gate (Google Sign-In) —— */
+body.auth-pending .nav,
+body.auth-pending .main{visibility:hidden;pointer-events:none}
+body.auth-ready .login-gate{display:none}
+.login-gate{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;background:var(--bg);
+}
+.login-card{
+  width:100%;max-width:400px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:32px 28px;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+.login-brand{
+  font-size:15px;font-weight:600;color:var(--brand-navy);
+  letter-spacing:-.02em;margin-bottom:20px;
+}
+.login-brand span{color:var(--text-muted);font-weight:500}
+.login-card h1{
+  font-size:22px;font-weight:600;letter-spacing:-.02em;
+  color:var(--text);margin:0 0 8px;
+}
+.login-sub{
+  font-size:14px;color:var(--text-muted);line-height:1.5;
+  margin:0 0 24px;
+}
+.btn-google{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:12px 16px;
+  font-family:var(--font);font-size:14px;font-weight:600;
+  color:var(--text);background:#fff;
+  border:1px solid var(--border);border-radius:10px;
+  cursor:pointer;transition:background .15s,border-color .15s;
+}
+.btn-google:hover{background:#fafaf9;border-color:#d6d3d1}
+.btn-google:disabled{opacity:.6;cursor:not-allowed}
+.login-error{
+  margin:16px 0 0;font-size:13px;color:var(--red);
+  line-height:1.4;
+}
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  margin-left:auto;flex-shrink:0;
+  font-size:12px;color:var(--text-secondary);
+}
+.user-avatar{
+  width:24px;height:24px;border-radius:999px;object-fit:cover;
+}
+.user-name{
+  max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-weight:500;
+}
+.btn-signout{
+  font-family:var(--font);font-size:12px;font-weight:600;
+  color:var(--accent-deep);background:var(--accent-soft);
+  border:none;border-radius:8px;padding:6px 10px;cursor:pointer;
+}
+.btn-signout:hover{filter:brightness(0.97)}
+@media(max-width:768px){
+  .user-name{display:none}
+  .user-chip{margin-left:8px}
+}
