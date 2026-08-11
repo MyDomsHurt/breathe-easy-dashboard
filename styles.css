@@ -92,6 +92,34 @@ body {
   gap: 4px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
+}
+.nav-sep {
+  display: inline-block;
+  width: 1px;
+  height: 16px;
+  margin: 0 8px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.nav-compete {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-compete:hover { color: var(--text); background: var(--border-soft); }
+.nav-compete.active {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: transparent;
+  font-weight: 600;
 }
 .nav-links a {
   font-size: 13px;
@@ -460,6 +488,20 @@ td.name { font-weight: 500; }
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+  }
+  .nav-sep {
+    height: 14px;
+    margin: 0 6px;
+  }
+  .nav-compete {
+    padding: 6px 10px;
+    font-size: 12px;
+    background: var(--border-soft);
+    flex: 0 0 auto;
+  }
+  .nav-compete.active {
+    background: var(--primary-soft);
+    color: var(--primary);
   }
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-links a {
