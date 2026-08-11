@@ -6,6 +6,12 @@
  * Charts: Chart.js. One hero chart per page. No revenue in UI.
  */
 const TECH_COLORS = {Matthew:'#1481c3',Nick:'#16a34a',Iggi:'#fb8e28',Alun:'#154487',Tiago:'#59bcee'};
+/** Display order (nav, stacked charts). Not rank order. */
+const TECH_ORDER = ['Matthew','Tiago','Nick','Alun','Iggi'];
+function techNames(){
+  const keys = DATA && DATA.technicians ? Object.keys(DATA.technicians) : TECH_ORDER;
+  return TECH_ORDER.filter(n => keys.includes(n)).concat(keys.filter(n => !TECH_ORDER.includes(n)));
+}
 let DATA=null, charts=[], RANK_MODE='day', TEAM_SCALE='week';
 
 function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
@@ -27,15 +33,20 @@ function scrollMainTop(){
   if(main) main.scrollTop=0;
 }
 function setNav(active){
-  const links=[
-    {href:'#/compete',label:'Competition'},
-    {href:'#/team',label:'Full Team'},
-    ...Object.keys(DATA.technicians).map(t=>({href:`#/tech/${t}`,label:t}))
+  // Crew first, Competition isolated at the end
+  const crew = [
+    {href:'#/team', label:'Full Team'},
+    ...techNames().map(t => ({href:`#/tech/${t}`, label:t}))
   ];
-  document.getElementById('nav-links').innerHTML=links.map(l=>{
-    const isActive = active===l.href || (l.href!=='#/compete' && l.href!=='#/team' && active.startsWith(l.href));
+  const crewHtml = crew.map(l => {
+    const isActive = active===l.href || (l.href!=='#/team' && active.startsWith(l.href));
     return `<a href="${l.href}" class="${isActive?'active':''}">${l.label}</a>`;
   }).join('');
+  const competeActive = active==='#/compete' ? ' active' : '';
+  document.getElementById('nav-links').innerHTML =
+    crewHtml +
+    `<span class="nav-sep" aria-hidden="true"></span>` +
+    `<a href="#/compete" class="nav-compete${competeActive}">Competition</a>`;
 }
 
 function gapToNext(sorted, i){
@@ -119,7 +130,7 @@ function fmtMetric(mode, v){
 }
 function teamWeekly(){
   const weeks=DATA.weeks||[];
-  const names=Object.keys(DATA.technicians);
+  const names=techNames();
   return weeks.map(w=>{
     let points=0, units=0, days=0, returns=0;
     for(const n of names){
@@ -221,7 +232,7 @@ function renderCompetition(){
   const mode = RANK_MODE || 'day';
   const labels=DATA.weekLabels;
   const weeks=DATA.weeks;
-  const names=Object.keys(DATA.technicians);
+  const names=techNames();
   const monthShort=monthLabel(currentMonthKey());
   const sorted=rankBy(mode);
   const metricKey=rankMetricKey(mode);
@@ -323,7 +334,7 @@ function renderTeam(){
   const team=DATA.team;
   const labels=DATA.weekLabels;
   const weeks=DATA.weeks;
-  const names=Object.keys(DATA.technicians);
+  const names=techNames();
   const tw=teamWeekly();
   const unitTotals=teamUnitTotals();
   const unitOrder=['S','W','B','C','UC','SwG','TV','OU'];
@@ -503,10 +514,10 @@ function renderTech(name){
 }
 
 function route(){
-  const hash=location.hash||'#/compete';
+  const hash=location.hash||'#/team';
   if(hash.startsWith('#/tech/')) renderTech(decodeURIComponent(hash.replace('#/tech/','')));
-  else if(hash==='#/team') renderTeam();
-  else renderCompetition();
+  else if(hash==='#/compete') renderCompetition();
+  else renderTeam();
   scrollMainTop();
 }
 loadData().then(()=>{
