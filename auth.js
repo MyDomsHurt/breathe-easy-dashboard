@@ -16,7 +16,8 @@
     "neltrestium@gmail.com",
     "sudor23@gmail.com",
     "tiagogiri334@gmail.com",
-    "iamruby112@gmail.com"
+    "iamruby112@gmail.com",
+    "joshua@breathe-easyhk.com"
   ].map(function (e) { return e.toLowerCase(); });
 
   if (!window.firebase) {
@@ -64,7 +65,7 @@
         : "";
       userChip.innerHTML =
         photo +
-        '<span class="user-name">' + name.replace(/</g, "&lt;") + "</span>" +
+        '<span class="user-name">' + name.replace(/</g, "<") + "</span>" +
         '<button type="button" class="btn-signout" id="btn-signout">Sign out</button>';
       var so = document.getElementById("btn-signout");
       if (so) {
