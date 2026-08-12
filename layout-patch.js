@@ -1,4 +1,4 @@
-/* layout-patch.js — Full Team closer to core reference (English only, artistic)
+/* layout-patch.js — Full Team (English only, no marketing taglines)
    Sculptural hero · skyline · water splash · letter badges · dark crew board
 */
 (function () {
@@ -71,12 +71,9 @@
             <div class="poster-logo-mark">Breathe-Easy</div>
             <div class="poster-logo-sub">AC CLEANING CREW · HONG KONG</div>
           </div>
-          <div class="poster-tagline">CLEAN AIR. COOL CONFIDENCE.<br>EVERY SPACE. EVERY TIME.</div>
         </div>
         <div class="poster-main">
           <div class="poster-mission">
-            <div class="mission-label">OUR MISSION</div>
-            <p class="mission-en">Breathing deeper. Cleaning deeper.<br>Healthier air for Hong Kong.</p>
             <div class="story-chips">${chips.join('')}</div>
           </div>
           <div class="poster-hero-col">
@@ -87,7 +84,6 @@
               <div class="story-hero-value">${fmt(stats.points, 1)}</div>
               ${splashSvg()}
             </div>
-            <div class="story-hero-sub">Every point is cleaner air.</div>
           </div>
         </div>
         <div class="poster-metrics">
@@ -112,7 +108,6 @@
             <div class="p-metric-lab">Returns</div>
           </div>
         </div>
-        <div class="poster-footer-line">CLEANER SYSTEMS · HEALTHIER SPACES · STRONGER TEAM</div>
       `;
     };
 
@@ -230,10 +225,6 @@
         <div class="section">
           <div class="section-title">What the crew delivered</div>
           <div class="unit-chips">${unitChips.map(u => `<div class="unit-chip"><div class="ut">${u}</div><div class="uv">${fmt(unitTotals[u])}</div></div>`).join('')}</div>
-        </div>
-        <div class="poster-bottom-tag">
-          One team. One standard. Cleaner air for Hong Kong.<br>
-          <span>Breathe-Easy AC Cleaning Crew · Hong Kong · Proudly Local</span>
         </div>
       `;
 
