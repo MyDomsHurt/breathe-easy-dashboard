@@ -1,2 +1,2 @@
-/* layout-patch.js — v61: Full Team charts live in app.js */
+/* layout-patch.js — v62: Full Team + Competition charts live in app.js */
 (function () {})();

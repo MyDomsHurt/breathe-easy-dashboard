@@ -1,4 +1,4 @@
-/* Direction A tech series — load after app.js */
+/* Direction A tech series — load after app.js (safety net; TECH_COLORS already set in app.js) */
 Object.assign(TECH_COLORS, {
   Matthew: '#2563eb',
   Tiago: '#0ea5e9',
