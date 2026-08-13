@@ -1,15 +1,15 @@
-/* v57 artistic overrides — English only, stronger sculptural hero */
+/* Artistic hero overrides — official brand navy/blue */
 .poster-glow{
   position:absolute;top:15%;right:8%;width:55%;height:55%;
-  background:radial-gradient(ellipse at center, rgba(94,200,240,.28) 0%, transparent 70%);
+  background:radial-gradient(ellipse at center, rgba(105,199,238,.28) 0%, transparent 70%);
   pointer-events:none;z-index:1;filter:blur(8px);
 }
 .team-story.poster{
   background:
-    radial-gradient(ellipse 70% 50% at 85% 20%, rgba(94,200,240,.4), transparent 55%),
-    radial-gradient(ellipse 40% 40% at 15% 80%, rgba(0,130,200,.35), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 85% 20%, rgba(105,199,238,.4), transparent 55%),
+    radial-gradient(ellipse 40% 40% at 15% 80%, rgba(40,150,209,.35), transparent 50%),
     radial-gradient(ellipse 60% 30% at 50% 0%, rgba(255,255,255,.08), transparent 50%),
-    linear-gradient(165deg, #050d22 0%, #0a1838 20%, #122448 45%, #1a3a7a 75%, #1a5fb0 100%) !important;
+    linear-gradient(165deg, #061428 0%, #0a3a6e 20%, #0c457f 45%, #0E4D91 75%, #2896D1 100%) !important;
 }
 .story-hero-value{
   font-size:clamp(3.8rem, 10vw, 6rem) !important;
@@ -25,7 +25,7 @@
     drop-shadow(0 4px 0 #7aadd8)
     drop-shadow(0 7px 0 #4a8fc0)
     drop-shadow(0 12px 28px rgba(0,0,0,.45))
-    drop-shadow(0 0 50px rgba(94,200,240,.45)) !important;
+    drop-shadow(0 0 50px rgba(105,199,238,.45)) !important;
 }
 .mission-zh{display:none !important}
 .mission-en{
