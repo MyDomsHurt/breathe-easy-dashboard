@@ -120,7 +120,7 @@ function renderTeam(){
   const retW=DATA.returnPointsWeight!=null?DATA.returnPointsWeight:0;
   const tw=weeks.map(w=>{let points=0,units=0,days=0,returns=0;
     names.forEach(n=>{const r=(DATA.technicians[n].weeks||[]).find(x=>x.week===w);if(!r)return;points+=r.points||0;units+=r.totalUnits||0;days+=r.workday||0;returns+=r.returns||0;});
-    return{points,units,days,returns,pointsDay:days?points/days:0;});
+    return{points,units,days,returns,pointsDay:days?points/days:0};});
   const unitTotals={};names.forEach(n=>{const ut=DATA.technicians[n].unitTotals||{};Object.keys(ut).forEach(k=>{unitTotals[k]=(unitTotals[k]||0)+ut[k];});});
   const unitOrder=['S','W','B','C','UC','SwG','TV','OU','EF','PAU','R'];
   const weightMap={};(DATA.pointsTable||[]).forEach(p=>weightMap[p.type]=p.points);
