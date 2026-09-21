@@ -80,6 +80,36 @@ body{
 .page-header h1{font-size:1.55rem;font-weight:800;letter-spacing:-.035em;line-height:1.15;margin-bottom:4px;color:var(--navy-deep)}
 .page-header p{font-size:13px;color:var(--mute);font-weight:500}
 
+.this-week{
+  background:#fff;
+  border:1px solid rgba(13,148,136,.22);
+  border-radius:var(--r);
+  padding:18px 20px 16px;
+  margin:0 0 22px;
+  box-shadow:var(--shadow-sm);
+}
+.this-week-kicker{
+  font-size:11px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:#0d9488;
+}
+.this-week-range{
+  font-size:13px;font-weight:600;color:var(--mute);margin:2px 0 14px;
+}
+.this-week-stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+}
+.this-week-stat .label{
+  font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:#0d9488;margin-bottom:6px;
+}
+.this-week-stat .value{
+  font-size:1.55rem;font-weight:800;letter-spacing:-.03em;
+  color:#154487;font-variant-numeric:tabular-nums;line-height:1;
+}
+@media (max-width:640px){
+  .this-week-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;}
+}
+
 /* ─── Reference poster grid ─── */
 .ref-hero-grid{
   display:grid;
