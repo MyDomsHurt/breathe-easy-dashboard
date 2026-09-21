@@ -69,11 +69,11 @@
     "C": "cassette"
   },
   "team": {
-    "totalPoints": 8207.0,
-    "totalUnits": 8017.0,
-    "totalDays": 734,
-    "totalReturns": 209,
-    "avgPointsDay": 11.2
+    "totalPoints": 8179.65,
+    "totalUnits": 7992.0,
+    "totalDays": 756,
+    "totalReturns": 279,
+    "avgPointsDay": 10.8
   },
   "weeks": [
     "2026-01-05",
@@ -187,18 +187,18 @@
   "ranking": [
     {
       "name": "Nick",
-      "totalPoints": 1761.6,
-      "totalUnits": 1683.0,
-      "totalDays": 142,
-      "totalReturns": 41,
+      "totalPoints": 1760.6,
+      "totalUnits": 1682.0,
+      "totalDays": 146,
+      "totalReturns": 54,
       "totalReturnPoints": 0.0,
-      "pointsDay": 12.41,
-      "unitsDay": 11.85,
-      "ownAvgPointsDay": 12.41,
+      "pointsDay": 12.06,
+      "unitsDay": 11.52,
+      "ownAvgPointsDay": 12.06,
       "trend": "Declining",
-      "weeksActive": 33,
+      "weeksActive": 34,
       "unitTotals": {
-        "S": 1010.0,
+        "S": 1009.0,
         "W": 334.0,
         "B": 251.0,
         "C": 46.0,
@@ -208,46 +208,46 @@
         "SwG": 19.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 41
+        "R": 54
       }
     },
     {
       "name": "Tiago",
-      "totalPoints": 2307.95,
-      "totalUnits": 2233.5,
-      "totalDays": 194,
-      "totalReturns": 58,
+      "totalPoints": 2284.6,
+      "totalUnits": 2212.5,
+      "totalDays": 200,
+      "totalReturns": 81,
       "totalReturnPoints": 0.0,
-      "pointsDay": 11.9,
-      "unitsDay": 11.51,
-      "ownAvgPointsDay": 11.9,
+      "pointsDay": 11.42,
+      "unitsDay": 11.06,
+      "ownAvgPointsDay": 11.42,
       "trend": "Declining",
       "weeksActive": 48,
       "unitTotals": {
-        "S": 1616.5,
-        "W": 365.0,
+        "S": 1601.5,
+        "W": 364.0,
         "B": 88.0,
         "C": 89.0,
-        "UC": 36.0,
+        "UC": 31.0,
         "TV": 0.0,
         "OU": 19.0,
         "SwG": 20.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 58
+        "R": 81
       }
     },
     {
       "name": "Matthew",
       "totalPoints": 2227.45,
       "totalUnits": 2143.5,
-      "totalDays": 213,
-      "totalReturns": 58,
+      "totalDays": 216,
+      "totalReturns": 70,
       "totalReturnPoints": 0.0,
-      "pointsDay": 10.46,
-      "unitsDay": 10.06,
-      "ownAvgPointsDay": 10.46,
-      "trend": "Stable",
+      "pointsDay": 10.31,
+      "unitsDay": 9.92,
+      "ownAvgPointsDay": 10.31,
+      "trend": "Improving",
       "weeksActive": 46,
       "unitTotals": {
         "S": 1340.0,
@@ -260,23 +260,23 @@
         "SwG": 12.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 58
+        "R": 70
       }
     },
     {
       "name": "Alun",
-      "totalPoints": 1184.3,
-      "totalUnits": 1217.0,
-      "totalDays": 114,
-      "totalReturns": 28,
+      "totalPoints": 1181.3,
+      "totalUnits": 1214.0,
+      "totalDays": 119,
+      "totalReturns": 44,
       "totalReturnPoints": 0.0,
-      "pointsDay": 10.39,
-      "unitsDay": 10.68,
-      "ownAvgPointsDay": 10.39,
+      "pointsDay": 9.93,
+      "unitsDay": 10.2,
+      "ownAvgPointsDay": 9.93,
       "trend": "Declining",
-      "weeksActive": 29,
+      "weeksActive": 30,
       "unitTotals": {
-        "S": 873.0,
+        "S": 870.0,
         "W": 302.0,
         "B": 26.0,
         "C": 0.0,
@@ -286,21 +286,21 @@
         "SwG": 16.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 28
+        "R": 44
       }
     },
     {
       "name": "Iggi",
       "totalPoints": 725.7,
       "totalUnits": 740.0,
-      "totalDays": 71,
-      "totalReturns": 24,
+      "totalDays": 75,
+      "totalReturns": 30,
       "totalReturnPoints": 0.0,
-      "pointsDay": 10.22,
-      "unitsDay": 10.42,
-      "ownAvgPointsDay": 10.22,
+      "pointsDay": 9.68,
+      "unitsDay": 9.87,
+      "ownAvgPointsDay": 9.68,
       "trend": "Declining",
-      "weeksActive": 18,
+      "weeksActive": 22,
       "unitTotals": {
         "S": 618.0,
         "W": 114.0,
@@ -312,7 +312,7 @@
         "SwG": 6.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 24
+        "R": 30
       }
     }
   ],
@@ -321,13 +321,13 @@
       "name": "Matthew",
       "totalPoints": 2227.45,
       "totalUnits": 2143.5,
-      "totalDays": 213,
-      "totalReturns": 58,
+      "totalDays": 216,
+      "totalReturns": 70,
       "totalReturnPoints": 0.0,
-      "pointsDay": 10.46,
-      "unitsDay": 10.06,
-      "ownAvgPointsDay": 10.46,
-      "trend": "Stable",
+      "pointsDay": 10.31,
+      "unitsDay": 9.92,
+      "ownAvgPointsDay": 10.31,
+      "trend": "Improving",
       "weeksActive": 46,
       "unitTotals": {
         "S": 1340.0,
@@ -340,49 +340,49 @@
         "SwG": 12.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 58
+        "R": 70
       }
     },
     "Tiago": {
       "name": "Tiago",
-      "totalPoints": 2307.95,
-      "totalUnits": 2233.5,
-      "totalDays": 194,
-      "totalReturns": 58,
+      "totalPoints": 2284.6,
+      "totalUnits": 2212.5,
+      "totalDays": 200,
+      "totalReturns": 81,
       "totalReturnPoints": 0.0,
-      "pointsDay": 11.9,
-      "unitsDay": 11.51,
-      "ownAvgPointsDay": 11.9,
+      "pointsDay": 11.42,
+      "unitsDay": 11.06,
+      "ownAvgPointsDay": 11.42,
       "trend": "Declining",
       "weeksActive": 48,
       "unitTotals": {
-        "S": 1616.5,
-        "W": 365.0,
+        "S": 1601.5,
+        "W": 364.0,
         "B": 88.0,
         "C": 89.0,
-        "UC": 36.0,
+        "UC": 31.0,
         "TV": 0.0,
         "OU": 19.0,
         "SwG": 20.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 58
+        "R": 81
       }
     },
     "Nick": {
       "name": "Nick",
-      "totalPoints": 1761.6,
-      "totalUnits": 1683.0,
-      "totalDays": 142,
-      "totalReturns": 41,
+      "totalPoints": 1760.6,
+      "totalUnits": 1682.0,
+      "totalDays": 146,
+      "totalReturns": 54,
       "totalReturnPoints": 0.0,
-      "pointsDay": 12.41,
-      "unitsDay": 11.85,
-      "ownAvgPointsDay": 12.41,
+      "pointsDay": 12.06,
+      "unitsDay": 11.52,
+      "ownAvgPointsDay": 12.06,
       "trend": "Declining",
-      "weeksActive": 33,
+      "weeksActive": 34,
       "unitTotals": {
-        "S": 1010.0,
+        "S": 1009.0,
         "W": 334.0,
         "B": 251.0,
         "C": 46.0,
@@ -392,23 +392,23 @@
         "SwG": 19.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 41
+        "R": 54
       }
     },
     "Alun": {
       "name": "Alun",
-      "totalPoints": 1184.3,
-      "totalUnits": 1217.0,
-      "totalDays": 114,
-      "totalReturns": 28,
+      "totalPoints": 1181.3,
+      "totalUnits": 1214.0,
+      "totalDays": 119,
+      "totalReturns": 44,
       "totalReturnPoints": 0.0,
-      "pointsDay": 10.39,
-      "unitsDay": 10.68,
-      "ownAvgPointsDay": 10.39,
+      "pointsDay": 9.93,
+      "unitsDay": 10.2,
+      "ownAvgPointsDay": 9.93,
       "trend": "Declining",
-      "weeksActive": 29,
+      "weeksActive": 30,
       "unitTotals": {
-        "S": 873.0,
+        "S": 870.0,
         "W": 302.0,
         "B": 26.0,
         "C": 0.0,
@@ -418,21 +418,21 @@
         "SwG": 16.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 28
+        "R": 44
       }
     },
     "Iggi": {
       "name": "Iggi",
       "totalPoints": 725.7,
       "totalUnits": 740.0,
-      "totalDays": 71,
-      "totalReturns": 24,
+      "totalDays": 75,
+      "totalReturns": 30,
       "totalReturnPoints": 0.0,
-      "pointsDay": 10.22,
-      "unitsDay": 10.42,
-      "ownAvgPointsDay": 10.22,
+      "pointsDay": 9.68,
+      "unitsDay": 9.87,
+      "ownAvgPointsDay": 9.68,
       "trend": "Declining",
-      "weeksActive": 18,
+      "weeksActive": 22,
       "unitTotals": {
         "S": 618.0,
         "W": 114.0,
@@ -444,7 +444,7 @@
         "SwG": 6.0,
         "EF": 0.0,
         "PAU": 0.0,
-        "R": 24
+        "R": 30
       }
     }
   }
