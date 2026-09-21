@@ -390,6 +390,14 @@ tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:var(--soft)}
 td.num,th.num{text-align:right}
 .total-row td{background:#f0f7fc;font-weight:700}
+.this-week .race-wrap{box-shadow:none;border:1px solid rgba(13,148,136,.18);margin-top:4px}
+.this-week thead th{background:#e6f7f5;color:#0d9488}
+tr.lead-row td{background:#f0faf8}
+.rank-num{font-weight:800;color:#154487}
+.rank-num.r1{color:#0d9488}
+.gap-lead{font-weight:700;color:#0d9488}
+.gap-behind{color:var(--mute);font-weight:600}
+.tech-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
 .scroll-hint{display:none;font-size:11px;color:var(--mute);margin-bottom:6px}
 
 .unit-chips{display:flex;flex-wrap:wrap;gap:10px}
